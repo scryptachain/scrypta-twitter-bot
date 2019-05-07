@@ -1,7 +1,7 @@
 {
-  "name": "scrypta-id-microservice",
+  "name": "scrypta-faucet",
   "version": "0.0.1",
-  "description": "Backend service for ScryptaID",
+  "description": "Scrypta faucet linked to Twitter",
   "main": "index.js",
   "scripts": {
     "dev": "tsc --watch & nodemon dist",
