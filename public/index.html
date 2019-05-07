@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scrypta Faucet - Earn Lyra doing things.</title>
+
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png">
+  <script src="https://unpkg.com/vue"></script>
+  <script src="/scryptacore.js"></script>
+</head>
+<body>
+  <div id="app">
+    
+  </div>
+
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        message: 'Hello VueJS!'
+      },
+      methods: {
+        signInWithTwitter(){
+          window.location = '/twitter/request-token'
+        }
+      }
+    })
+  </script>
+</body>
+</html>
