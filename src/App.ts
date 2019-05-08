@@ -31,7 +31,7 @@ class App {
         Twitter.followers(process.env.TWITTER_USERNAME)
         //Twitter.tweets(process.env.TWITTER_USERNAME)
         Twitter.mentions(process.env.TWITTER_USERNAME)
-      },300000)
+      },180000)
     }
   }
 }

@@ -90,9 +90,9 @@ export async function followers(twitter_user) {
             var newfollowers = 0
             for(var index in followers){
                 var user_follow = followers[index].screen_name
-                console.log('NEW FOLLOWER: ' + user_follow + '!')
                 db.set('USER_' + user_follow,  followers[index].id_str)
                 if(tipped.indexOf(user_follow) === -1){
+                    console.log('NEW FOLLOWER: ' + user_follow + '!')
                     db.sadd('FOLLOW_' + twitter_user, user_follow)
                     newfollowers ++
                     tipuser(user_follow,'FOLLOW',twitter_user,process.env.TIP_FOLLOW,process.env.COIN)
