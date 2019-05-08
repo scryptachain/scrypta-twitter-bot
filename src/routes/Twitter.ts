@@ -10,7 +10,7 @@ import * as Crypto from '../libs/Crypto'
 var crypto = require('crypto');
 var axios = require('axios');
 var twitterlogin = require("node-twitter-api")
-
+var os = require('os')
 var config = require('../config.js');
 if(config.access_token !== undefined && config.access_token_secret !== undefined){
     var Twitter = new twit(config);
@@ -27,10 +27,11 @@ function sleep(ms) {
 }
 
 var _requestSecret
+
 var twtlogin = new twitterlogin({
     consumerKey: process.env.TWITTER_CONSUMERKEY,
     consumerSecret:  process.env.TWITTER_CONSUMERSECRET,
-    callback: 'http://localhost:3000/twitter/callback'
+    callback: process.env.URL + '/twitter/callback'
 });
 
 export function getAuth(req: express.Request, res: express.res) {
