@@ -10,6 +10,7 @@ const get = promisify(db.get).bind(db)
 var CoinKey = require('coinkey')
 import * as Crypto from '../libs/Crypto'
 var crypto = require('crypto');
+var axios = require('axios');
 
 const coinInfo = {
     private: 0xae,
@@ -32,7 +33,7 @@ export async function followers(twitter_user) {
                 var user_follow = followers[index].screen_name
                 db.set('USER_' + user_follow,  followers[index].id_str)
                 if(tipped.indexOf(user_follow) === -1){
-                    //tipuser(user_follow,'FOLLOW',twitter_user,process.env.TIP_FOLLOW,process.env.COIN)
+                    tipuser(user_follow,'FOLLOW',twitter_user,process.env.TIP_FOLLOW,process.env.COIN)
                     db.sadd('FOLLOW_' + twitter_user, user_follow)
                     newfollowers ++
                 }
@@ -161,8 +162,9 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 twitter_user,
                 'We\'ve createad an unique .sid file for you! You can download it from here: https://faucet.scryptachain.org/ids/' + ck.publicAddress + '.sid. You can import it into https://manent.scryptachain.org or https://id.scryptachain.org with this password: ' + password + "\n\nWe don't store that password so please safely store where you prefer and destroy this message! Keeps your funds SAFE!"
             )
-
+            
             if(result === true){
+                await axios.post('https://idanode01.scryptachain.org/init', { address: ck.publicAddress })
                 pubAddr = ck.publicAddress
                 db.set('ADDRESS_' + twitter_user,pubAddr)
             }else{
