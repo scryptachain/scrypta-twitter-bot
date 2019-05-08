@@ -28,7 +28,7 @@ class App {
         Twitter.followers(process.env.TWITTER_WATCHACCOUNT)
         Twitter.tweets(process.env.TWITTER_WATCHACCOUNT)
         Twitter.mentions(process.env.TWITTER_WATCHACCOUNT)
-      },180000)
+      },300000)
     }
   }
 }
