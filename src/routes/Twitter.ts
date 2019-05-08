@@ -93,9 +93,13 @@ export async function followers(twitter_user) {
                 console.log('NEW FOLLOWER: ' + user_follow + '!')
                 db.set('USER_' + user_follow,  followers[index].id_str)
                 if(tipped.indexOf(user_follow) === -1){
-                    tipuser(user_follow,'FOLLOW',twitter_user,process.env.TIP_FOLLOW,process.env.COIN)
-                    db.sadd('FOLLOW_' + twitter_user, user_follow)
-                    newfollowers ++
+                    tipuser(user_follow,'FOLLOW',twitter_user,process.env.TIP_FOLLOW,process.env.COIN).then(function(txid){
+                        console.log('TXID IS: ' + txid)
+                        if(txid !== undefined && txid !== ''){
+                            db.sadd('FOLLOW_' + twitter_user, user_follow)
+                            newfollowers ++
+                        }
+                    })
                 }
             }
             console.log('FOUND ' + newfollowers + ' NEW FOLLOWERS!')
@@ -139,11 +143,13 @@ export async function mentions(twitter_user) {
                 var mention_id = mentions[index]['id_str']
                 db.set('USER_' + user_mention, mentions[index].user.id_str)
                 if(tipped.indexOf(mention_id) === -1){
-                    var tx = tipuser(user_mention,'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN)
-                    if(tx['txid'] !== undefined){
-                        db.sadd('MENTIONS_' + twitter_user, mention_id)
-                        newmentions++
-                    }
+                    tipuser(user_mention,'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN).then(function(txid){
+                        console.log('TXID IS: ' + txid)
+                        if(txid !== undefined && txid !== ''){
+                            db.sadd('MENTIONS_' + twitter_user, mention_id)
+                            newmentions++
+                        }
+                    })
                 }
             }
             console.log('FOUND ' + newmentions + ' NEW MENTIONS')
@@ -166,9 +172,13 @@ export async function retweets(twitter_user, tweet_id, count) {
                 db.set('USER_' + user_retweet, retweets[index].user.id_str)
                 if(user_retweet !== twitter_user){
                     if(tipped.indexOf(user_retweet) === -1){
-                        tipuser(user_retweet,'RETWEET',tweet_id,process.env.TIP_RETWEET, process.env.COIN)
-                        db.sadd('RETWEET_' + tweet_id, user_retweet)
-                        newretweets++
+                        tipuser(user_retweet,'RETWEET',tweet_id,process.env.TIP_RETWEET, process.env.COIN).then(function(txid){
+                            console.log('TXID IS: ' + txid)
+                            if(txid !== undefined && txid !== ''){
+                                db.sadd('RETWEET_' + tweet_id, user_retweet)
+                                newretweets++
+                            }
+                        })
                     }
                 }
             }
