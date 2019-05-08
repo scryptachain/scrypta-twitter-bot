@@ -239,7 +239,7 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 if(balance > amount){
                     console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + coin)
                     wallet.request('sendtoaddress',[pubAddr,parseInt(amount)]).then(function(txid){
-                        Twitter.post('statuses/update', {status: "@"+twitter_user + " I've sent " + amount + " $" + coin + " to you! Enjoy!" })
+                        Twitter.post('statuses/update', {status: "@"+twitter_user + " I've sent " + amount + " $" + coin + " to you! Check your TXID: " + txid['result'] + "!"})
                         response(txid['result'])
                     })
                 }else{
