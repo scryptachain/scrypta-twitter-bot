@@ -4,7 +4,7 @@ const {exec} = require('child_process')
 let {nextAvailable} = require('node-port-check')
 
 const server = async () => {
-  let port = await nextAvailable(4001, '0.0.0.0')
+  let port = await nextAvailable(3000, '0.0.0.0')
   app.engine('html', require('ejs').renderFile);
   app.listen(port, (err) => {
     if (err) {

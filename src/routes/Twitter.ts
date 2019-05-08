@@ -1,7 +1,5 @@
 import express = require("express")
 var twit = require('twit')
-var config = require('../config.js');
-var Twitter = new twit(config);
 var redis = require("redis")
 var db = redis.createClient()
 const {promisify} = require('util')
@@ -11,6 +9,12 @@ var CoinKey = require('coinkey')
 import * as Crypto from '../libs/Crypto'
 var crypto = require('crypto');
 var axios = require('axios');
+var twitterlogin = require("node-twitter-api")
+
+var config = require('../config.js');
+if(config.access_token !== undefined && config.access_token_secret !== undefined){
+    var Twitter = new twit(config);
+}
 
 const coinInfo = {
     private: 0xae,
@@ -22,6 +26,60 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+var _requestSecret
+var twtlogin = new twitterlogin({
+    consumerKey: process.env.TWITTER_CONSUMERKEY,
+    consumerSecret:  process.env.TWITTER_CONSUMERSECRET,
+    callback: 'http://localhost:3000/twitter/callback'
+});
+
+export function getAuth(req: express.Request, res: express.res) {
+    if(process.env.TWITTER_ACCESSTOKEN === undefined && process.env.TWITTER_TOKENSECRET === undefined){
+        twtlogin.getRequestToken(function(err, requestToken, requestSecret) {
+            if (err)
+                res.status(500).send(err);
+            else {
+                _requestSecret = requestSecret;
+                res.redirect("https://api.twitter.com/oauth/authenticate?oauth_token=" + requestToken);
+            }
+        });
+    }else{
+        res.send({error: "This bot is configured, to configure it again please remove TWITTER_ACCESSTOKEN and TWITTER_TOKENSECRET from your dotenv file."})
+    }
+}
+
+export function getAccessToken(req: express.Request, res: express.res) {
+    var requestToken = req.query.oauth_token,
+    verifier = req.query.oauth_verifier;
+
+    twtlogin.getAccessToken(requestToken, _requestSecret, verifier, function(err, accessToken, accessSecret) {
+          if (err){
+              res.status(500).send(err);
+          }else{
+            twtlogin.verifyCredentials(accessToken, accessSecret, function(err, user) {
+                  if (err){
+                      res.status(500).send(err);
+                  }else{
+                    res.send({
+                        user
+                    });
+                    const fs = require('fs');
+                    fs.appendFile('.env', "\r\n" + 'TWITTER_ACCESSTOKEN=' + accessToken , function(err){
+                        console.log('ACCESS TOKEN WRITTEN')
+                    })
+                    fs.appendFile('.env', "\r\n" + 'TWITTER_TOKENSECRET=' + accessSecret, function(err){
+                        console.log('TOKEN SECRET WRITTEN')
+                    })
+                    fs.appendFile('.env', "\r\n" + 'TWITTER_USERNAME=' + user.screen_name, function(err){
+                        console.log('USERNAME WRITTEN')
+                    })
+                }
+              });
+          }
+    });
+
+}
+
 export async function followers(twitter_user) {
     console.log('LOOKING FOR @'+twitter_user+' FOLLOWER')
     var tipped = await getmembers('FOLLOW_' + twitter_user)
@@ -31,6 +89,7 @@ export async function followers(twitter_user) {
             var newfollowers = 0
             for(var index in followers){
                 var user_follow = followers[index].screen_name
+                console.log('NEW FOLLOWER: ' + user_follow + '!')
                 db.set('USER_' + user_follow,  followers[index].id_str)
                 if(tipped.indexOf(user_follow) === -1){
                     tipuser(user_follow,'FOLLOW',twitter_user,process.env.TIP_FOLLOW,process.env.COIN)

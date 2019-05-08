@@ -18,17 +18,20 @@ class App {
     app.express.use(cors())
     
     app.express.get('/',Interface.rendervue)
-    
-    if(process.env.TWITTER_WATCHACCOUNT !== undefined){
-      Twitter.followers(process.env.TWITTER_WATCHACCOUNT)
-      Twitter.tweets(process.env.TWITTER_WATCHACCOUNT)
-      Twitter.mentions(process.env.TWITTER_WATCHACCOUNT)
+
+    app.express.get('/twitter/request-token',Twitter.getAuth)
+    app.express.get('/twitter/callback',Twitter.getAccessToken)
+    if(process.env.TWITTER_USERNAME !== undefined){
+      Twitter.followers(process.env.TWITTER_USERNAME)
+      /*Twitter.followers(process.env.TWITTER_USERNAME)
+      Twitter.tweets(process.env.TWITTER_USERNAME)
+      Twitter.mentions(process.env.TWITTER_USERNAME)
       
       setInterval(function(){
-        Twitter.followers(process.env.TWITTER_WATCHACCOUNT)
-        Twitter.tweets(process.env.TWITTER_WATCHACCOUNT)
-        Twitter.mentions(process.env.TWITTER_WATCHACCOUNT)
-      },300000)
+        Twitter.followers(process.env.TWITTER_USERNAME)
+        Twitter.tweets(process.env.TWITTER_USERNAME)
+        Twitter.mentions(process.env.TWITTER_USERNAME)
+      },300000)*/
     }
   }
 }
