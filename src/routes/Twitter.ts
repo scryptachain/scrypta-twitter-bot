@@ -27,7 +27,7 @@ function sleep(ms) {
 }
 
 var _requestSecret
-
+console.log('INIT TWITTER WITH ' + process.env.TWITTER_CONSUMERKEY+ ' ' + process.env.TWITTER_CONSUMERSECRET)
 var twtlogin = new twitterlogin({
     consumerKey: process.env.TWITTER_CONSUMERKEY,
     consumerSecret:  process.env.TWITTER_CONSUMERSECRET,
