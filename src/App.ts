@@ -24,12 +24,12 @@ class App {
 
     if(process.env.TWITTER_USERNAME !== undefined){
       Twitter.followers(process.env.TWITTER_USERNAME)
-      Twitter.tweets(process.env.TWITTER_USERNAME)
+      //Twitter.tweets(process.env.TWITTER_USERNAME)
       Twitter.mentions(process.env.TWITTER_USERNAME)
       
       setInterval(function(){
         Twitter.followers(process.env.TWITTER_USERNAME)
-        Twitter.tweets(process.env.TWITTER_USERNAME)
+        //Twitter.tweets(process.env.TWITTER_USERNAME)
         Twitter.mentions(process.env.TWITTER_USERNAME)
       },300000)
     }
