@@ -218,7 +218,7 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 console.log('ADDRESS SUCCESSFULLY CREATED!');
             });
 
-            var result = await message(
+            /*var result = await message(
                 twitter_user,
                 'We\'ve createad an unique .sid file for you! You can download it from here: https://faucet.scryptachain.org/ids/' + ck.publicAddress + '.sid. You can import it into https://manent.scryptachain.org or https://id.scryptachain.org with this password: ' + password + "\n\nWe don't store that password so please safely store where you prefer and destroy this message! Keeps your funds SAFE!"
             )
@@ -228,8 +228,8 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 pubAddr = ck.publicAddress
                 db.set('ADDRESS_' + twitter_user,pubAddr)
             }else{
-                Twitter.post('statuses/update', {status: "@"+twitter_user + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
-            }
+                //Twitter.post('statuses/update', {status: "@"+twitter_user + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
+            }*/
         }
 
         if(pubAddr !== ''){
@@ -238,7 +238,7 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 var balance = info['result']['balance']
                 if(balance > amount){
                     wallet.request('sendtoaddress',[pubAddr,amount]).then(function(txid){
-                        Twitter.post('statuses/update', {status: "@"+twitter_user + " I've sent " + amount + " $" + coin + " to you! Enjoy!" })
+                        //Twitter.post('statuses/update', {status: "@"+twitter_user + " I've sent " + amount + " $" + coin + " to you! Enjoy!" })
                         response(txid)
                     })
                 }else{
