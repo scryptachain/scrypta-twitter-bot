@@ -29,7 +29,8 @@ COININFO_SCRIPTHASH=0x0d
 COIN=LYRA
 TIP_FOLLOW=3
 TIP_RETWEET=1
-TIP_MENTION=2" > scrypta-faucet/.env
+TIP_MENTION=2
+TESTMODE=true" > scrypta-faucet/.env
 
 cd scrypta-faucet
 npm install

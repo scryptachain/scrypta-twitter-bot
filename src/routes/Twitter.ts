@@ -12,6 +12,12 @@ var axios = require('axios');
 var twitterlogin = require("node-twitter-api")
 var os = require('os')
 var config = require('../config.js');
+var testmode = process.env.TESTMODE.toLowerCase() == 'true' ? true : false;
+
+if(testmode === true){
+    console.log('\x1b[33m%s\x1b[0m', 'RUNNING IN TEST MODE')
+}
+
 if(config.access_token !== undefined && config.access_token_secret !== undefined){
     var Twitter = new twit(config);
 }
@@ -27,12 +33,15 @@ function sleep(ms) {
 }
 
 var _requestSecret
-console.log('INIT TWITTER WITH ' + process.env.TWITTER_CONSUMERKEY+ ' ' + process.env.TWITTER_CONSUMERSECRET)
-var twtlogin = new twitterlogin({
-    consumerKey: process.env.TWITTER_CONSUMERKEY,
-    consumerSecret:  process.env.TWITTER_CONSUMERSECRET,
-    callback: process.env.URL + '/twitter/callback'
-});
+if(process.env.TWITTER_CONSUMERKEY !== undefined && process.env.TWITTER_CONSUMERSECRET !== undefined){
+    var twtlogin = new twitterlogin({
+        consumerKey: process.env.TWITTER_CONSUMERKEY,
+        consumerSecret:  process.env.TWITTER_CONSUMERSECRET,
+        callback: process.env.URL + '/twitter/callback'
+    });
+}else{
+    console.log('\x1b[41m%s\x1b[0m', 'SETUP TWITTER FIRST!')
+}
 
 export function getAuth(req: express.Request, res: express.res) {
     if(process.env.TWITTER_ACCESSTOKEN === undefined && process.env.TWITTER_TOKENSECRET === undefined){
@@ -90,32 +99,25 @@ export async function followers(twitter_user) {
             var newfollowers = 0
             for(var index in followers){
                 var user_follow = followers[index].screen_name
-                db.set('USER_' + user_follow,  followers[index].id_str)
                 if(tipped.indexOf(user_follow) === -1){
-                    console.log('NEW FOLLOWER: ' + user_follow + '!')
-                    db.sadd('FOLLOW_' + twitter_user, user_follow)
-                    newfollowers ++
-                    tipuser(user_follow,'FOLLOW',twitter_user,process.env.TIP_FOLLOW,process.env.COIN)
+                    var user_registration = new Date(followers[index].created_at)
+                    var now = new Date(); 
+                    var diff = now.getTime() - user_registration.getTime();
+                    var elapsed = diff / (1000*60*60*24)
+                    if(elapsed >= parseInt(process.env.MIN_DAYS)){
+                        newfollowers ++
+                        console.log('NEW FOLLOWER: ' + user_follow + '!')
+                        db.set('USER_' + user_follow,  followers[index].id_str)
+                        db.sadd('FOLLOW_' + twitter_user, user_follow)
+                        tipuser(user_follow,'FOLLOW',twitter_user,process.env.TIP_FOLLOW,process.env.COIN)
+                    }else{
+                        console.log('USER '+user_follow+' IS TOO YOUNG.')
+                    }
                 }
             }
             console.log('FOUND ' + newfollowers + ' NEW FOLLOWERS!')
         }else{
             console.log('ERROR WHILE GETTING FOLLOWERS LIST!', err.message)
-        }
-    })
-};
-
-export async function tweets(twitter_user) {
-    console.log('LOOKING FOR @'+twitter_user+' TWEETS')
-    Twitter.get('statuses/user_timeline', { screen_name: twitter_user, count: 30 },function(err, data){
-        if (!err) {
-            var tweets = data
-            for(var index in tweets){
-                var tweet = tweets[index]
-                retweets(twitter_user, tweet['id_str'], index)
-            }
-        }else{
-            console.log('ERROR WHILE GETTING USER TIMELINE!', err.message)
         }
     })
 };
@@ -137,11 +139,19 @@ export async function mentions(twitter_user) {
             for(var index in mentions){
                 var user_mention = mentions[index].user.screen_name
                 var mention_id = mentions[index]['id_str']
-                db.set('USER_' + user_mention, mentions[index].user.id_str)
                 if(tipped.indexOf(mention_id) === -1 && user_mention !== process.env.TWITTER_USERNAME){
-                    db.sadd('MENTIONS_' + twitter_user, mention_id)
-                    newmentions++
-                    tipuser(user_mention,'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN)
+                    var user_registration = new Date(mentions[index].user.created_at)
+                    var now = new Date(); 
+                    var diff = now.getTime() - user_registration.getTime();
+                    var elapsed = diff / (1000*60*60*24)
+                    if(elapsed > parseInt(process.env.MIN_DAYS)){
+                        newmentions++
+                        db.set('USER_' + user_mention, mentions[index].user.id_str)
+                        db.sadd('MENTIONS_' + twitter_user, mention_id)
+                        tipuser(user_mention,'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN)
+                    }else{
+                        console.log('USER '+user_mention+' IS TOO YOUNG.')
+                    }
                 }
             }
             console.log('FOUND ' + newmentions + ' NEW MENTIONS')
@@ -151,100 +161,101 @@ export async function mentions(twitter_user) {
     })
 };
 
-export async function retweets(twitter_user, tweet_id, count) {
-    await sleep(2000 * count)
-    console.log('LOOKING FOR '+ tweet_id +' RETWEETS!')
-    var tipped = await getmembers('RETWEET_' + tweet_id)
-    Twitter.get('statuses/retweets/:id', { id: tweet_id }, function(err, data){
-        if(!err){
-            var retweets = data
-            var newretweets = 0
-            for(var index in retweets){
-                var user_retweet = retweets[index].user.screen_name
-                db.set('USER_' + user_retweet, retweets[index].user.id_str)
-                if(user_retweet !== twitter_user){
-                    if(tipped.indexOf(user_retweet) === -1){
-                        db.sadd('RETWEET_' + tweet_id, user_retweet)
-                        newretweets++
-                        tipuser(user_retweet,'RETWEET',tweet_id,process.env.TIP_RETWEET, process.env.COIN)
+export async function tipuser(twitter_user, action, id = '', amount, coin) {
+    return new Promise(async response => {
+        console.log('\x1b[32m%s\x1b[0m','TIPPING USER ' + twitter_user + ' WITH ' + amount + ' ' + coin + ' FOR ' + action + '!')
+        var last_tip = await get('LAST_TIP_' + twitter_user)
+        var eligible = false
+        if(last_tip === null){
+            eligible = true
+        }else{
+            var now = new Date().getTime()
+            var elapsed = (now - last_tip) / (1000*60)
+            if(elapsed >= parseInt(process.env.MIN_TIMEFRAME)){
+                eligible = true
+            }
+        }
+
+        if(eligible === true){
+            var address = await get('ADDRESS_' + twitter_user)
+            var pubAddr = ''
+            
+            if(address !== null){
+                //SEND TO ADDRESS
+                pubAddr = address
+            }else{
+                //CREATE ADDRESS FOR USER
+                var ck = CoinKey.createRandom(coinInfo)
+                var lyrapub = ck.publicAddress;
+                var lyraprv = ck.privateWif;
+                var lyrakey = ck.publicKey.toString('hex');
+                var buf = crypto.randomBytes(16);
+                var api_secret = buf.toString('hex');
+                var buf = crypto.randomBytes(16);
+                var password = buf.toString('hex');
+
+                var newwallet = {
+                    prv: lyraprv,
+                    api_secret: api_secret,
+                    key: lyrakey
+                };
+
+                const cipher = crypto.createCipher('aes-256-cbc', password);
+                let wallethex = cipher.update(JSON.stringify(newwallet), 'utf8', 'hex');
+                wallethex += cipher.final('hex');
+
+                var walletstore = lyrapub + ':' + wallethex;
+                var fs = require('fs');
+
+                fs.appendFile('public/ids/' + ck.publicAddress + '.sid', walletstore, function (err) {
+                    if (err) throw err;
+                    console.log('ADDRESS SUCCESSFULLY CREATED!');
+                });
+
+                var result = await message(
+                    twitter_user,
+                    'We\'ve createad an unique .sid file for you! You can download it from here: https://faucet.scryptachain.org/ids/' + ck.publicAddress + '.sid. You can import it into https://manent.scryptachain.org or https://id.scryptachain.org with this password: ' + password + "\n\nWe don't store that password so please safely store where you prefer and destroy this message! Keeps your funds SAFE!"
+                )
+                
+                if(result === true){
+                    await axios.post('https://idanode01.scryptachain.org/init', { address: ck.publicAddress })
+                    pubAddr = ck.publicAddress
+                    db.set('ADDRESS_' + twitter_user,pubAddr)
+                }else{
+                    if(testmode === false){
+                        Twitter.post('statuses/update', {status: "@"+twitter_user + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
                     }
                 }
             }
 
-            console.log('FOUND ' + newretweets + ' NEW RETWEETS!')
+            if(pubAddr !== ''){
+                var wallet = new Crypto.Wallet;
+                var timestamp = new Date().getTime()
+                db.set('LAST_TIP_' + twitter_user, timestamp)
+                wallet.request('getinfo').then(function(info){
+                    var balance = info['result']['balance']
+                    if(balance > amount){
+                        console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + coin)
+                        if(testmode === false){
+                            wallet.request('sendtoaddress',[pubAddr,parseInt(amount)]).then(function(txid){
+                                Twitter.post('statuses/update', {status: "@"+twitter_user + " I've sent " + amount + " $" + coin + " to you! Check your TXID: " + txid['result'] + "!"})
+                                console.log('TXID IS ' + txid['result'])
+                                response(txid['result'])
+                            })
+                        }else{
+                            response('TXIDHASH')
+                        }
+                    }else{
+                        console.log('OPS, NOT ENOUGH FUNDS!')
+                    }
+                })
+            }
         }else{
-            console.log('ERROR WHILE GETTING RETWEETS!', err.message)
-        }
-    })
-}
-
-export async function tipuser(twitter_user, action, id = '', amount, coin) {
-    return new Promise(async response => {
-        console.log('\x1b[32m%s\x1b[0m','TIPPING USER ' + twitter_user + ' WITH ' + amount + ' ' + coin + ' FOR ' + action + '!')
-        var address = await get('ADDRESS_' + twitter_user)
-        var pubAddr = ''
-        
-        if(address !== null){
-            //SEND TO ADDRESS
-            pubAddr = address
-        }else{
-            //CREATE ADDRESS FOR USER
-            var ck = CoinKey.createRandom(coinInfo)
-            var lyrapub = ck.publicAddress;
-            var lyraprv = ck.privateWif;
-            var lyrakey = ck.publicKey.toString('hex');
-            var buf = crypto.randomBytes(16);
-            var api_secret = buf.toString('hex');
-            var buf = crypto.randomBytes(16);
-            var password = buf.toString('hex');
-
-            var newwallet = {
-                prv: lyraprv,
-                api_secret: api_secret,
-                key: lyrakey
-            };
-
-            const cipher = crypto.createCipher('aes-256-cbc', password);
-            let wallethex = cipher.update(JSON.stringify(newwallet), 'utf8', 'hex');
-            wallethex += cipher.final('hex');
-
-            var walletstore = lyrapub + ':' + wallethex;
-            var fs = require('fs');
-
-            fs.appendFile('public/ids/' + ck.publicAddress + '.sid', walletstore, function (err) {
-                if (err) throw err;
-                console.log('ADDRESS SUCCESSFULLY CREATED!');
-            });
-
             var result = await message(
                 twitter_user,
-                'We\'ve createad an unique .sid file for you! You can download it from here: https://faucet.scryptachain.org/ids/' + ck.publicAddress + '.sid. You can import it into https://manent.scryptachain.org or https://id.scryptachain.org with this password: ' + password + "\n\nWe don't store that password so please safely store where you prefer and destroy this message! Keeps your funds SAFE!"
+                'Not so fast! You must wait at least 15 minutes between retweet or mention us to be rewarded!'
             )
-            
-            if(result === true){
-                await axios.post('https://idanode01.scryptachain.org/init', { address: ck.publicAddress })
-                pubAddr = ck.publicAddress
-                db.set('ADDRESS_' + twitter_user,pubAddr)
-            }else{
-                Twitter.post('statuses/update', {status: "@"+twitter_user + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
-            }
-        }
-
-        if(pubAddr !== ''){
-            var wallet = new Crypto.Wallet;
-            wallet.request('getinfo').then(function(info){
-                var balance = info['result']['balance']
-                if(balance > amount){
-                    console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + coin)
-                    wallet.request('sendtoaddress',[pubAddr,parseInt(amount)]).then(function(txid){
-                        Twitter.post('statuses/update', {status: "@"+twitter_user + " I've sent " + amount + " $" + coin + " to you! Check your TXID: " + txid['result'] + "!"})
-                        console.log('TXID IS ' + txid['result'])
-                        response(txid['result'])
-                    })
-                }else{
-                    console.log('OPS, NOT ENOUGH FUNDS!')
-                }
-            })
+            console.log('USER WAS TIPPED IN THE PAST ' + process.env.MIN_TIMEFRAME + ' MINUTES, BAD LUCK!')
         }
     })
 }
@@ -254,14 +265,18 @@ export async function message(twitter_user, message) {
         console.log('SENDING MESSAGE TO ' + twitter_user)
         var twitter_id = await get("USER_" + twitter_user)
         if(twitter_id !== null){
-            var msg = {"event": {"type": "message_create", "message_create": {"target": {"recipient_id": twitter_id}, "message_data": {"text": message}}}}
-            Twitter.post('direct_messages/events/new', msg, function(err, data){
-                if(data.event !== undefined){
-                    response(true)
-                }else{
-                    response(false)
-                }
-            })
+            if(testmode === false){
+                var msg = {"event": {"type": "message_create", "message_create": {"target": {"recipient_id": twitter_id}, "message_data": {"text": message}}}}
+                Twitter.post('direct_messages/events/new', msg, function(err, data){
+                    if(data.event !== undefined){
+                        response(true)
+                    }else{
+                        response(false)
+                    }
+                })
+            }else{
+                response(true)
+            }
         }else{
             response(false)
             console.log("CAN'T FIND USER ID")
