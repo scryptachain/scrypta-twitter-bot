@@ -211,10 +211,24 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                     if (err) throw err;
                     console.log('ADDRESS SUCCESSFULLY CREATED!');
                 });
+                var message_text = "Your ScryptaID Account with LYRA Address are created! Now you can download your .sid file from here: https://faucet.scryptachain.org/ids/" + ck.publicAddress + ".sid\r\n"
+                message_text +="Using this file you can access in Scrypta dApps and manage your funds. Please keep .sid file safe! if you lost it, you can’t log in  your Scrypta Account, so at your funds!\r\n\r\n"
+                message_text +="You can import .sid on\r\n";
+                message_text +="- Scrypta Manent [Withdraw and send fuction]:\r\n";
+                message_text +="https://manent.scryptachain.org/\r\n\r\n";
+                message_text +="or import in\r\n";
+                message_text +="- ScryptaID [browser extension for manage your ID and access in all Scrypta dApps]:\r\n";
+                message_text +="https://id.scryptachain.org/\r\n\r\n";
+                message_text +="Use this password: " + password + "\r\n\r\n";
+                message_text +="ATTENTION: We don't store that password so please SAFELY STORE where you prefer and DESTROY THIS MESSAGE! Keeps your funds SAFE!\r\n\r\n";
+                
+                message_text +="ADDITIONAL INFO:\r\n";
+                message_text +="- To receive LYRA bounty you must be have an active Twitter account since 1 MONTH\r\n";
+                message_text +="- You can react with our post and receive LYRA every 15 minutes";
 
                 var result = await message(
                     twitter_user,
-                    'We\'ve createad an unique .sid file for you! You can download it from here: https://faucet.scryptachain.org/ids/' + ck.publicAddress + '.sid. You can import it into https://manent.scryptachain.org or https://id.scryptachain.org with this password: ' + password + "\n\nWe don't store that password so please safely store where you prefer and destroy this message! Keeps your funds SAFE!"
+                    message_text
                 )
                 
                 if(result === true){
