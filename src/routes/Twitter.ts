@@ -253,6 +253,10 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                         if(testmode === false){
                             wallet.request('sendtoaddress',[pubAddr,parseInt(amount)]).then(function(txid){
                                 //Twitter.post('statuses/update', {status: "@"+twitter_user + " I've sent " + amount + " $" + coin + " to you! Check your TXID: " + txid['result'] + "!"})
+                                message(
+                                    twitter_user,
+                                    "I've sent " + amount + " $" + coin + " to you! Check your TXID: " + txid['result'] + "!"
+                                )
                                 console.log('TXID IS ' + txid['result'])
                                 response(txid['result'])
                             })
