@@ -270,7 +270,7 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
         }else{
             var result = await message(
                 twitter_user,
-                'Not so fast! You must wait at least 15 minutes between retweet or mention us to be rewarded!'
+                'Not so fast! You must wait at least ' + process.env.MIN_TIMEFRAME + ' minutes between retweet or mention us to be rewarded!'
             )
             console.log('USER WAS TIPPED IN THE PAST ' + process.env.MIN_TIMEFRAME + ' MINUTES, BAD LUCK!')
         }
