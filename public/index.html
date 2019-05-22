@@ -1,25 +1,238 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" dir="ltr">
+
 <head>
-  <title>Scrypta Faucet - Earn Lyra doing things.</title>
+    <meta charset="UTF-8">
+    <title>Scryptachain Faucet</title>
+    <meta name="description" content="Twitter Bot Scryptachain.">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link rel="icon" type="image/png" href="/assets/images/favicon.png">
-  <script src="https://unpkg.com/vue"></script>
-  <script src="/scryptacore.js"></script>
+    <!-- Standard favicon -->
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+
+    
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+        <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:500,700,900" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" integrity="sha384-5SOiIsAziJl6AWe0HWRKTXlfcSHKmYV4RBF18PPJ173Kzn7jzMyFuTtk8JA7QQG1" crossorigin="anonymous">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+
+    <!-- Default CSS -->
+    <link rel="stylesheet" type="text/css" href="assets/css/default.css">
+
+    <!-- Color CSS -->
+    <link rel="stylesheet" type="text/css" href="assets/css/color.css">
+
+    <!-- Font CSS -->
+    <link rel="stylesheet" type="text/css" href="assets/css/font.css">
+
+    <!-- Button CSS -->
+    <link rel="stylesheet" type="text/css" href="assets/css/button.css">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+
 </head>
-<body>
-  <div id="app">
-  </div>
+<body class="text-black base-font-size">
 
-  <script>
-    var app = new Vue({
-      el: '#app',
-      data: {
-        message: 'Hello VueJS!'
-      },
-      methods: {
-      }
-    })
-  </script>
+    <div class="wrapper h-100">
+
+        <div class="cover">
+            
+            <!-- Hero -->
+            <div class="jumbotron jumbotron-fluid bg-light-grey font-weight__500 hero mb-0">
+                <div class="container hero-inner">
+                    <div class="row align-items-center">
+                        <div class="col-10 col-lg-4 mx-auto">
+                            <div class="text-center mb-5">
+                                <img src="assets/images/scrypta.png" class="img-fluid w-75 d-inline-block d-sm-none" alt="App Image">
+                                <img src="assets/images/caiotitus_icon.png" class="img-fluid w-75 d-none d-sm-inline-block" alt="App Image">
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-8">
+                            <div id="key-features" class="key-features">
+                                <div class="text-center text-lg-left">
+                                    <h1 class="xxxl-font-size font-weight__700 text-black">
+                                        Wellcome to Scrypta Faucet 
+                                    </h1>
+                                    <p class="lead text-dark-gray">
+                                        Scrypta is a decentralized digital infrastructure that simplifies and makes more efficient managing, archiving and certification processes that feature the economic, productive and social sectors. Scrypta flexible system allows creating full architectures for unlimited projects and new use cases.
+                                    </p>
+                                    <br>
+                                    <br>
+                                    <h3>
+                                        Start now to earn <a style="color:#eb5757">LYRA</a> and join our project 
+                                    </h3>
+                                    <p class="lead text-dark-gray">
+                                        Here will be cloudy days! But don't worry, only LYRA will rain!
+                                    </p>
+                                </div>
+                                <!-- Empty Space -->
+                                <div class="md-space"></div>
+                                <!--/ End Empty Space -->
+                                <h2 class="text-primary base-plus-font-size text-center text-lg-left">It is simple! Interact with our Twitter Post</h2>
+                                <!-- Empty Space -->
+                                <div class="sm-space"></div>
+                                <!--/ End Empty Space -->
+                                <div class="row align-items-center">
+                                    <div class="col-10 col-sm-6 mx-auto">
+                                        <div class="my-3">
+                                            <div class="icon-wrap d-inline mr-2">
+                                                <i class="icon p-2 border rounded border-color-secondary bg-light-grey text-primary sm-font-size fas fa-hashtag"></i>
+                                            </div>
+                                            <h3 class="d-inline base-font-size text-dark-gray">Follow <a href="https://twitter.com/scryptachain" target="_blank">@Scryptachain</a></h3>
+                                        </div>
+                                    </div>
+                                    <div class="col-10 col-sm-6 mx-auto">
+                                        <div class="my-3">
+                                            <div class="icon-wrap d-inline mr-2">
+                                                <i class="icon p-2 border rounded border-color-secondary bg-light-grey text-primary sm-font-size fas fa-hashtag"></i>
+                                            </div>
+                                            <h3 class="d-inline base-font-size text-dark-gray">Follow <a href="https://twitter.com/BotScrypta" target="_blank">@BotScrypta</a></h3>
+                                        </div>
+                                    </div>
+                                    <div class="col-10 col-sm-6 mx-auto">
+                                        <div class="my-3">
+                                            <div class="icon-wrap d-inline mr-2">
+                                                <i class="icon p-2 border rounded border-color-secondary bg-light-grey text-primary sm-font-size fas fa-comment"></i>
+                                            </div>
+                                            <h3 class="d-inline base-font-size text-dark-gray">Comment</h3>
+                                        </div>
+                                    </div>
+                                    <div class="col-10 col-sm-6 mx-auto">
+                                        <div class="my-3">
+                                            <div class="icon-wrap d-inline mr-2">
+                                                <i class="icon p-2 border rounded border-color-secondary bg-light-grey text-primary sm-font-size fas fa-quote-right"></i>
+                                            </div>
+                                            <h3 class="d-inline base-font-size text-dark-gray">Quote @scryptachain</h3>
+                                        </div>
+                                    </div>
+                                    <div class="col-10 col-sm-6 mx-auto">
+                                        <div class="my-3">
+                                            <div class="icon-wrap d-inline mr-2">
+                                                <i class="icon p-2 border rounded border-color-secondary bg-light-grey text-primary sm-font-size fas fa-sync"></i>
+                                            </div>
+                                            <h3 class="d-inline base-font-size text-dark-gray">Retweet</h3>
+                                        </div>
+                                    </div>
+                                    <div class="col-10 col-sm-6 mx-auto">
+                                        <div class="my-3">
+                                            <div class="icon-wrap d-inline mr-2">
+                                                <i class="icon p-2 border rounded border-color-secondary bg-light-grey text-primary sm-font-size fas fa-users"></i>
+                                            </div>
+                                            <h3 class="d-inline base-font-size text-dark-gray">Tag friends & spread the word!</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Empty Space -->
+                                <div class="md-space"></div>
+                                <!--/ End Empty Space -->
+                                <h2 class="text-primary base-plus-font-size text-center text-lg-left">And you will automatically receive LYRA!</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--/ End Hero -->
+        </div>
+        <!-- CTA -->
+        <section class="CTA section bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 col-md-11 mx-auto">
+                        <div class="row align-items-center">
+                            <div class="col-12 col-lg-12">
+                                <div class="text-left text-lg-left mb-3 mb-lg-0">
+                                    <h2 class="md-font-size font-weight__700">
+                                        Instructions:
+                                    </h2>
+                                    <p class="lead sm-font-size">
+                                        Your Scrypta account with LYRA address will be created and you can download your .sid file from the link that <a href="https://twitter.com/BotScrypta" target="_blank">@BotScrypta</a> send you as a twitter message. 
+                                    </p>
+                                    <p class="lead sm-font-size">
+                                        Using this file you can access in Scrypta dApps and manage your funds. Please keep .sid file safe! if you lost it, you can’t log in your Scrypta Account, so at your funds!
+                                    </p>
+                                    <br>
+                                    <br>
+                                    <h3 style="color:#eb5757">
+                                        You can import .sid on:
+                                    </h3>
+                                    <p class="lead sm-font-size">
+                                        <a href="https://manent.scryptachain.org" target="_blank"><button type="button" class="btn btn-danger  btn-lg btn-block">Scrypta Manent
+                                        </button></a>
+                                        <!-- Empty Space -->
+                                <div class="md-space"></div>
+                                <!--/ End Empty Space -->
+                                        <a href="https://id.scryptachain.org" target="_blank"><button type="button" class="btn btn-danger btn-lg btn-block">ScryptaID</button></a>
+                                    </p>
+                                    <br>
+                                    <br>
+                                    <p class="lead sm-font-size">
+                                        Use the password <a href="https://twitter.com/BotScrypta" target="_blank">@BotScrypta</a> sent you via Twitter message
+                                    </p>
+                                    <br>
+                                    <p class="lead sm-font-size">
+                                        <div class="alert alert-warning" role="alert">
+                                            <h4 class="alert-heading">ATTENTION:</h4>
+                                            <p>We don't store that password so please SAFELY STORE where you prefer and DESTROY THE TWITTER MESSAGE!</p>
+                                            <hr>
+                                            <p class="mb-0">Keeps your funds SAFE!</p>
+                                          </div>
+                                          <div class="alert alert-info" role="alert">
+                                            <h4 class="alert-heading">ADDITIONAL INFO:</h4>
+                                            <p>To receive lyra bounty you must be have an active Twitter account since 1 MONTH</p>
+                                            <hr>
+                                            <p class="mb-0">You can react with our post and receive LYRA every 15 minutes</p>
+                                          </div>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!--/ End CTA -->
+
+        <!-- Footer -->
+        <footer class="footer section bg-light-primary text-gray pt-2">
+                            <div class="copyright xs-font-size text-center">
+                                &copy; <a href="https://scryptachain.org" target="_blank">Scryptachain</a> 2019. All Rights Reserved.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <!--/ End Footer -->
+
+    </div>
+
+    <!-- jQuery Script -->
+    <script src="assets/js/jquery.min.js"></script>
+
+    <!-- Popper Script -->
+    <script src="assets/js/popper.min.js"></script>
+
+    <!-- Bootstrap Script -->
+    <script src="assets/js/bootstrap.min.js"></script>
+
+    <!-- Main Script -->
+    <script src="assets/js/main.js"></script>
+
 </body>
+
 </html>
