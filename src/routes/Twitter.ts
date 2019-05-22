@@ -211,20 +211,17 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                     if (err) throw err;
                     console.log('ADDRESS SUCCESSFULLY CREATED!');
                 });
-                var message_text = "Your ScryptaID Account with LYRA Address are created! Now you can download your .sid file from here: https://faucet.scryptachain.org/ids/" + ck.publicAddress + ".sid\r\n"
-                message_text +="Using this file you can access in Scrypta dApps and manage your funds. Please keep .sid file safe! if you lost it, you can’t log in  your Scrypta Account, so at your funds!\r\n\r\n"
-                message_text +="You can import .sid on\r\n";
-                message_text +="- Scrypta Manent [Withdraw and send fuction]:\r\n";
-                message_text +="https://manent.scryptachain.org/\r\n\r\n";
-                message_text +="or import in\r\n";
-                message_text +="- ScryptaID [browser extension for manage your ID and access in all Scrypta dApps]:\r\n";
-                message_text +="https://id.scryptachain.org/\r\n\r\n";
-                message_text +="Use this password: " + password + "\r\n\r\n";
-                message_text +="ATTENTION: We don't store that password so please SAFELY STORE where you prefer and DESTROY THIS MESSAGE! Keeps your funds SAFE!\r\n\r\n";
-                
-                message_text +="ADDITIONAL INFO:\r\n";
-                message_text +="- To receive LYRA bounty you must be have an active Twitter account since 1 MONTH\r\n";
-                message_text +="- You can react with our post and receive LYRA every 15 minutes";
+
+                var message_text = " Your Scrypta Account with LYRA Address are created!\r\n"
+                message_text += "All your reactions with our Twitter posts will receive a reward in LYRA on the address that we have just provided to you.\r\n"
+                message_text += "Now you can download your .sid file from here: https://faucet.scryptachain.org/ids/" + ck.publicAddress + ".sid\r\nUsing this file you can access in Scrypta dApps and manage your funds.\r\n\r\n"
+                message_text += "Please keep .sid file safe! if you lost it, you can&rsquo;t login into your Scrypta Account, so at your funds!\r\n\r\n"
+                message_text += "You can import .sid on\r\n"
+                message_text += "Scrypta Manent [Withdraw and send fuction]: https://manent.scryptachain.org\r\n"
+                message_text += "or import it in\r\nScryptaID [browser extension for manage your ID and access in all Scrypta dApps]: https://id.scryptachain.org\r\n"
+                message_text += "using this password: " + password + "\r\n\r\n"
+                message_text += "ATTENTION: We don't store that password so please SAFELY STORE where you prefer and DESTROY THIS MESSAGE! Keeps your funds SAFE! THIS MESSAGE WILL BE DESTROYED FROM OUR TWITTER FOR SECURITY REASON. NO ONE CAN RECOVER YOUR PASSWORD IF YOU LOSE OR FORGET IT.\r\n\r\n"
+                message_text += "ADDITIONAL INFO: - To receive LYRA bounty you must be have an active Twitter account since 1 MONTH  - You can react with our post and receive LYRA every " + process.env.MIN_TIMEFRAME + " minutes"
 
                 var result = await message(
                     twitter_user,
