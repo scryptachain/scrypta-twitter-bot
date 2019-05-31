@@ -99,20 +99,25 @@ export async function followers(twitter_user) {
             var newfollowers = 0
             for(var index in followers){
                 var user_follow = followers[index].screen_name
-                if(tipped.indexOf(user_follow) === -1){
-                    var user_registration = new Date(followers[index].created_at)
-                    var now = new Date(); 
-                    var diff = now.getTime() - user_registration.getTime();
-                    var elapsed = diff / (1000*60*60*24)
-                    if(elapsed >= parseInt(process.env.MIN_DAYS)){
-                        newfollowers ++
-                        console.log('NEW FOLLOWER: ' + user_follow + '!')
-                        db.set('USER_' + user_follow,  followers[index].id_str)
-                        db.sadd('FOLLOW_' + twitter_user, user_follow)
-                        tipuser(user_follow,'FOLLOW',twitter_user,process.env.TIP_FOLLOW,process.env.COIN)
-                    }else{
-                        console.log('USER '+user_follow+' IS TOO YOUNG.')
+                var user_mention_followers = followers[index].followers_count
+                if(user_mention_followers >= process.env.MIN_FOLLOWERS){
+                    if(tipped.indexOf(user_follow) === -1){
+                        var user_registration = new Date(followers[index].created_at)
+                        var now = new Date(); 
+                        var diff = now.getTime() - user_registration.getTime();
+                        var elapsed = diff / (1000*60*60*24)
+                        if(elapsed >= parseInt(process.env.MIN_DAYS)){
+                            newfollowers ++
+                            console.log('NEW FOLLOWER: ' + user_follow + '!')
+                            db.set('USER_' + user_follow,  followers[index].id_str)
+                            db.sadd('FOLLOW_' + twitter_user, user_follow)
+                            tipuser(user_follow,'FOLLOW',twitter_user,process.env.TIP_FOLLOW,process.env.COIN)
+                        }else{
+                            console.log('USER '+user_follow+' IS TOO YOUNG.')
+                        }
                     }
+                }else{
+                    console.log('USER '+user_follow+' DON\'T HAVE THE REQUIRED FOLLOWERS ('+ user_mention_followers +')')
                 }
             }
             console.log('FOUND ' + newfollowers + ' NEW FOLLOWERS!')
@@ -125,8 +130,7 @@ export async function followers(twitter_user) {
 export async function mentions(twitter_user) {
     console.log('LOOKING FOR @'+twitter_user+' MENTIONS')
 
-    var tipped = await getmembers('MENTIONS_' + twitter_user)
-    Twitter.get('search/tweets', {q: '@' + twitter_user}, function(err, data) {
+    Twitter.get('search/tweets', {q: '@' + twitter_user}, async function(err, data) {
         if(!err){
             var found = data.statuses
             var mentions = []
@@ -137,21 +141,32 @@ export async function mentions(twitter_user) {
             }
             var newmentions = 0
             for(var index in mentions){
+                var tipped = await getmembers('MENTIONS_' + twitter_user)
+                //console.log(mentions[index])
                 var user_mention = mentions[index].user.screen_name
-                var mention_id = mentions[index]['id_str']
-                if(tipped.indexOf(mention_id) === -1 && user_mention !== process.env.TWITTER_USERNAME){
-                    var user_registration = new Date(mentions[index].user.created_at)
-                    var now = new Date(); 
-                    var diff = now.getTime() - user_registration.getTime();
-                    var elapsed = diff / (1000*60*60*24)
-                    if(elapsed > parseInt(process.env.MIN_DAYS)){
-                        newmentions++
-                        db.set('USER_' + user_mention, mentions[index].user.id_str)
-                        db.sadd('MENTIONS_' + twitter_user, mention_id)
-                        tipuser(user_mention,'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN)
+                var user_mention_followers = mentions[index].user.followers_count
+                if(mentions[index].retweeted_status !== undefined){
+                    if(user_mention_followers >= process.env.MIN_FOLLOWERS){
+                        var mention_id = mentions[index]['id_str']
+                        if(tipped.indexOf(mention_id) === -1 && user_mention !== process.env.TWITTER_USERNAME){
+                            var user_registration = new Date(mentions[index].user.created_at)
+                            var now = new Date(); 
+                            var diff = now.getTime() - user_registration.getTime();
+                            var elapsed = diff / (1000*60*60*24)
+                            if(elapsed > parseInt(process.env.MIN_DAYS)){
+                                newmentions++
+                                db.set('USER_' + user_mention, mentions[index].user.id_str)
+                                db.sadd('MENTIONS_' + twitter_user, mention_id)
+                                await tipuser(user_mention,'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN)
+                            }else{
+                                console.log('USER '+user_mention+' IS TOO YOUNG.')
+                            }
+                        }
                     }else{
-                        console.log('USER '+user_mention+' IS TOO YOUNG.')
+                        console.log('USER '+user_mention+' DON\'T HAVE THE REQUIRED FOLLOWERS ('+ user_mention_followers +')')
                     }
+                }else{
+                    console.log('THIS IS A COMMENT, WE DON\'T REWARD FOR COMMENTS')
                 }
             }
             console.log('FOUND ' + newmentions + ' NEW MENTIONS')
