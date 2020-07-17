@@ -31,7 +31,7 @@
     "formidable": "^1.2.1",
     "ipfs": "^0.34.4",
     "lcrypt": "^1.0.2",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "node-port-check": "^2.0.1",
     "node-twitter-api": "^1.8.0",
     "node-typescript": "^0.1.3",
