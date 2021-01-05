@@ -15,7 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "7.0.22",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "bluebird": "^3.5.4",
     "body-parser": "^1.18.3",
     "child_process": "^1.0.2",
