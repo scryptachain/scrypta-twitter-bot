@@ -25,6 +25,7 @@ class App {
     var wallet = new Crypto.Wallet;
     wallet.request('getinfo').then(info => {
       if (info !== undefined) {
+        console.log('WALLET STATUS', info)
         if (process.env.TWITTER_USERNAME !== undefined) {
           Twitter.followers(process.env.TWITTER_USERNAME) 
           Twitter.mentions(process.env.TWITTER_USERNAME)
@@ -32,6 +33,7 @@ class App {
           setInterval(function () {
             wallet.request('getinfo').then(info => {
               if (info !== undefined) {
+                console.log('WALLET STATUS', info)
                 Twitter.followers(process.env.TWITTER_USERNAME)
                 Twitter.mentions(process.env.TWITTER_USERNAME)
               } else {
