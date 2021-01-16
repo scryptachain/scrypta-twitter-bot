@@ -26,7 +26,7 @@ class App {
     wallet.request('getinfo').then(info => {
       if (info !== undefined) {
         if (process.env.TWITTER_USERNAME !== undefined) {
-          Twitter.followers(process.env.TWITTER_USERNAME)
+          Twitter.followers(process.env.TWITTER_USERNAME) 
           Twitter.mentions(process.env.TWITTER_USERNAME)
 
           setInterval(function () {
