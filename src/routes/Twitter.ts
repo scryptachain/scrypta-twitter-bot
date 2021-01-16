@@ -258,7 +258,6 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 console.log('PUB ADDRESS IS ' + pubAddr)
                 var wallet = new Crypto.Wallet;
                 var timestamp = new Date().getTime()
-                db.set('LAST_TIP_' + twitter_user, timestamp)
                 wallet.request('getinfo').then(function(info){
                     console.log(info)
                     if(info !== undefined){
@@ -268,6 +267,7 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                             if(testmode === false){
                                 wallet.request('sendtoaddress',[pubAddr,parseFloat(amount)]).then(function(txid){
                                     console.log(txid)
+                                    db.set('LAST_TIP_' + twitter_user, timestamp)
                                     message(
                                         twitter_user,
                                         "I've sent " + amount + " $" + coin + " to you! Check your TXID: " + txid['result'] + "!"
