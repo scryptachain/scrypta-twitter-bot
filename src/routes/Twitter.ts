@@ -10,7 +10,6 @@ import * as Crypto from '../libs/Crypto'
 var crypto = require('crypto');
 var axios = require('axios');
 var twitterlogin = require("node-twitter-api")
-var os = require('os')
 var config = require('../config.js');
 var testmode = process.env.TESTMODE.toLowerCase() == 'true' ? true : false;
 
@@ -257,7 +256,6 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 var wallet = new Crypto.Wallet;
                 var timestamp = new Date().getTime()
                 wallet.request('getinfo').then(function (info) {
-                    console.log(info)
                     if (info !== undefined) {
                         var balance = info['result']['balance']
                         if (balance > amount) {
@@ -275,6 +273,7 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                                         response(txid['result'])
                                     } else {
                                         console.log("ERROR WHILE SENDING TIP")
+                                        response('ERROR')
                                     }
                                 })
                             } else {
@@ -282,9 +281,11 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                             }
                         } else {
                             console.log('OPS, NOT ENOUGH FUNDS!')
+                            response('ERROR')
                         }
                     } else {
                         console.log('WALLET NOT WORKING')
+                        response('ERROR')
                     }
                 })
             }
