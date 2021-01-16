@@ -27,10 +27,6 @@ const coinInfo = {
     scripthash: 0x0d
 };
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 var _requestSecret
 if (process.env.TWITTER_CONSUMERKEY !== undefined && process.env.TWITTER_CONSUMERSECRET !== undefined) {
     var twtlogin = new twitterlogin({

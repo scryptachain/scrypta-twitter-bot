@@ -1,6 +1,5 @@
 import express = require("express")
 import * as Crypto from '../libs/Crypto'
-import * as Utilities from '../libs/Utilities'
 var redis = require("redis")
 var db = redis.createClient()
 const {promisify} = require('util')
@@ -12,9 +11,4 @@ export async function getinfo(req: express.Request, res: express.Response) {
     wallet.request('getinfo').then(function(info){
         res.json(info['result'])
     })
-};
-
-export async function sendtoaddress(address, amount) {
-    var wallet = new Crypto.Wallet;
-    //TODO
 };
