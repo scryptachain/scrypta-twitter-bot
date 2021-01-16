@@ -244,7 +244,7 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 )
                 
                 if(result === true){
-                    await axios.post('https://idanode01.scryptachain.org/init', { address: ck.publicAddress })
+                    // await axios.post('https://idanodejs01.scryptachain.org/init', { address: ck.publicAddress })
                     pubAddr = ck.publicAddress
                     db.set('ADDRESS_' + twitter_user,pubAddr)
                 }else{
