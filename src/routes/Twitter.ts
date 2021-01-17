@@ -335,7 +335,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                                     if (txid !== undefined && txid['result'] !== undefined && txid['result'].length === 64) {
                                         await db.insert('tips', { user_id: twitter_user.id, id: action_id, timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: address, txid: txid['result'] })
                                         console.log('TXID IS ' + txid['result'])
-                                        await post('Just sent ' + amount + ' $' + coin + ' to @' + twitter_user.screen_name)
+                                        await post('Just sent ' + amount + ' $' + coin + ' to @' + twitter_user.screen_name + '. Check the transaction at https://bb.scryptachain.org/tx/' + txid['result'] + '!')
                                         response(txid['result'])
                                     } else {
                                         console.log("ERROR WHILE SENDING TIP")
