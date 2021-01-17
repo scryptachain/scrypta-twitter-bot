@@ -421,6 +421,7 @@ export async function message(twitter_user, message) {
                 if (data.event !== undefined) {
                     response(true)
                 } else {
+                    console.log("Can't send message to user, sorry.")
                     response(false)
                 }
             })
