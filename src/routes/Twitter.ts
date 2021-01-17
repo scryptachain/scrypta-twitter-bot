@@ -235,36 +235,40 @@ export async function commands() {
                                     if (sender_user !== null && sender_user.prv !== undefined) {
                                         let totip_screenname = exploded[j].replace('@', '')
                                         let totip_user = await db.find('followers', { screen_name: totip_screenname })
-                                        if (check === null) {
+                                        if (totip_user === null) {
                                             console.log('CREATING NEW TIPPED USER @' + totip_screenname + '!')
-                                            totip_user = await Twitter.get('users/show', { screen_name: '#scryptabot' })
+                                            let twitter_user = await Twitter.get('users/show', { screen_name: totip_screenname })
                                             var ck = CoinKey.createRandom(coinInfo)
-                                            totip_user.address = ck.publicAddress
-                                            totip_user.prv = ck.privateWif
-                                            await db.insert('followers', totip_user)
+                                            twitter_user.data.address = ck.publicAddress
+                                            twitter_user.data.prv = ck.privateWif
+                                            await db.insert('followers', twitter_user.data)
                                             totip_user = await db.find('followers', { screen_name: totip_screenname })
                                         }
-                                        let aix = j + 1
-                                        let amount = parseFloat(exploded[aix])
-                                        if (amount > 0) {
-                                            const scrypta = new ScryptaCore
-                                            let balance = await scrypta.get('/balance/' + sender_user.address)
-                                            if (balance.balance >= amount) {
-                                                try {
-                                                    let temp = await scrypta.importPrivateKey(sender_user.prv, '-', false)
-                                                    let sent = await scrypta.send(temp.walletstore, '-', totip_user.address, amount)
-                                                    if (sent !== false && sent !== null && sent.length === 64) {
-                                                        await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: 'LYRA', channel: 'TWITTER', address: totip_user.address, txid: sent })
-                                                        await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $LYRA to @' + totip_user.screen_name)
-                                                    } else {
-                                                        console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                        if (totip_user !== null) {
+                                            let amount = parseFloat(exploded[3])
+                                            if (amount > 0) {
+                                                const scrypta = new ScryptaCore
+                                                let balance = await scrypta.get('/balance/' + sender_user.address)
+                                                if (balance.balance >= amount) {
+                                                    try {
+                                                        let temp = await scrypta.importPrivateKey(sender_user.prv, '-', false)
+                                                        let sent = await scrypta.send(temp.walletstore, '-', totip_user.address, amount)
+                                                        if (sent !== false && sent !== null && sent.length === 64) {
+                                                            await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: 'LYRA', channel: 'TWITTER', address: totip_user.address, txid: sent })
+                                                            await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $LYRA to @' + totip_user.screen_name + '. Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
+                                                        } else {
+                                                            console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                                        }
+                                                    } catch (e) {
+                                                        console.log(e)
+                                                        console.log("SENDING ERROR, WILL RETRY LATER")
                                                     }
-                                                } catch (e) {
-                                                    console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
                                                 }
+                                            } else {
+                                                console.log('AMOUNT IS NOT VALID ' + amount)
                                             }
                                         } else {
-                                            console.log('AMOUNT IS NOT VALID ' + amount)
+                                            console.log("USER DON'T EXISTS!")
                                         }
                                     } else {
                                         console.log('USER IS NOT REGISTERED TO SERVICE.')
