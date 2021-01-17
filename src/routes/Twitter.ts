@@ -345,7 +345,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                     await db.update('followers', { id: twitter_user.id }, { $set: { address: pubAddr } })
                 } else {
                     if (testmode === false) {
-                        Twitter.post('statuses/update', { status: "@" + twitter_user + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
+                        Twitter.post('statuses/update', { status: "@" + twitter_user.screen_name + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
                     }
                 }
             }
