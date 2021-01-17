@@ -33,6 +33,14 @@ if (process.env.TWITTER_CONSUMERKEY !== undefined && process.env.TWITTER_CONSUME
     console.log('\x1b[41m%s\x1b[0m', 'SETUP TWITTER FIRST!')
 }
 
+function sleep(ms){
+    return new Promise(response => {
+        setTimeout(function (){
+            response(true)
+        }, ms)
+    })
+}
+
 export function getAuth(req: express.Request, res: express.res) {
     if (process.env.TWITTER_ACCESSTOKEN === undefined && process.env.TWITTER_TOKENSECRET === undefined) {
         twtlogin.getRequestToken(function (err, requestToken, requestSecret) {
@@ -408,7 +416,8 @@ export async function message(twitter_user, message) {
         const db = new Database.Mongo
         if (testmode === false) {
             var msg = { "event": { "type": "message_create", "message_create": { "target": { "recipient_id": twitter_user }, "message_data": { "text": message } } } }
-            Twitter.post('direct_messages/events/new', msg, function (err, data) {
+            Twitter.post('direct_messages/events/new', msg, async function (err, data) {
+                await sleep(30000)
                 if (data.event !== undefined) {
                     response(true)
                 } else {
