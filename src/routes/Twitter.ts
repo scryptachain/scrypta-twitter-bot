@@ -417,7 +417,7 @@ export async function message(twitter_user, message) {
         if (testmode === false) {
             var msg = { "event": { "type": "message_create", "message_create": { "target": { "recipient_id": twitter_user }, "message_data": { "text": message } } } }
             Twitter.post('direct_messages/events/new', msg, async function (err, data) {
-                await sleep(30000)
+                await sleep(10000)
                 if (data.event !== undefined) {
                     response(true)
                 } else {
