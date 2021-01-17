@@ -192,9 +192,17 @@ export async function ambassadors() {
                                     console.log('CREATING NEW FOLLWER WITH ADDRESS ' + address + '!')
                                     twitter_user.address = address
                                     await db.insert('followers', twitter_user)
+                                    await message(
+                                        twitter_user.id,
+                                        "Compliments, you're now a Scrypta Ambassador! You will receive rewards for each interaction with us at address " + address + "!"
+                                    )
                                 } else if(check.address !== address) {
                                     console.log('UPDATING USER ' + twitter_user.screen_name + ' WITH ADDRESS ' + address)
                                     await db.update('followers', { id: twitter_user.id }, { $set: { address: address } })
+                                    await message(
+                                        twitter_user.id,
+                                        "Compliments, your address is now updated with " + address + "!"
+                                    )
                                 }
                             }
                         }
