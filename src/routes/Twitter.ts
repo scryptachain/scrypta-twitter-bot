@@ -120,11 +120,11 @@ export async function followers(twitter_user) {
     })
 };
 
-export async function cashtags(tag, twitter_user) {
+export async function tag(tag, twitter_user) {
     return new Promise(async response => {
         const db = new Database.Mongo
-        console.log('LOOKING FOR @' + tag + ' CASHTAG')
-        Twitter.get('search/tweets', { q: '$' + tag }, async function (err, data) {
+        console.log('LOOKING FOR TAG: ' + tag)
+        Twitter.get('search/tweets', { q: tag }, async function (err, data) {
             if (!err) {
                 var found = data.statuses
                 var mentions = []

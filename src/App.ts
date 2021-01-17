@@ -47,7 +47,9 @@ class App {
         console.log('WALLET STATUS', info)
         await Twitter.followers(process.env.TWITTER_USERNAME)
         await Twitter.mentions(process.env.TWITTER_USERNAME)
-        await Twitter.cashtags(process.env.COIN, process.env.TWITTER_USERNAME)
+        await Twitter.tag('$' + process.env.COIN, process.env.TWITTER_USERNAME)
+        await Twitter.tag('#scrypta', process.env.TWITTER_USERNAME)
+        await Twitter.tag('#scryptachain', process.env.TWITTER_USERNAME)
       } else {
         console.log('WALLET NOT WORKING, CAN\'T START PROCESS!')
         try {
