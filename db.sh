@@ -4,7 +4,7 @@ cd docker
 if [[ "$@" =~ "-rebuild" ]]
 then
     echo "Rebuilding Docker Image"
-    docker build --no-cache -t do:mongo .
+    docker build --no-cache -t bot:mongo .
 else
     docker ps | grep 'bot_mongo' &> /dev/null
     if [ $? == 0 ]; then
@@ -12,8 +12,8 @@ else
         docker start bot_mongo
     else
         echo "Running MongoDB."
-        docker build -t do:mongo .
-        docker run --restart=unless-stopped -d --name=bot_mongo -dit -p 27017:27017 do:mongo
+        docker build -t bot:mongo .
+        docker run --restart=unless-stopped -d --name=bot_mongo -dit -p 27017:27017 bot:mongo
     fi
 fi
 
