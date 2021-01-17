@@ -171,6 +171,44 @@ export async function tag(tag, twitter_user) {
     })
 };
 
+export async function ambassadors() {
+    return new Promise(async response => {
+        const db = new Database.Mongo
+        console.log('LOOKING FOR DIRECT COMMANDS UPDATES.')
+        Twitter.get('search/tweets', { q: '#scryptabot' }, async function (err, data) {
+            if (!err) {
+                for (var index in data.statuses) {
+                    // console.log('\x1b[42m%s\x1b[0m', mentions[index].text,  mentions[index].user.screen_name)
+                    let twitter_user = data.statuses[index].user
+                    let text = data.statuses[index].text
+                    if (text.indexOf('address') !== -1) {
+                        let exploded = text.split(' ')
+                        for (let j in exploded) {
+                            console.log('--> CHECKING ' + exploded[j])
+                            if (exploded[j].substr(0, 1) === 'L') {
+                                let address = exploded[j]
+                                var check = await db.find('followers', { id: twitter_user.id })
+                                if (check === null) {
+                                    console.log('CREATING NEW FOLLWER WITH ADDRESS ' + address + '!')
+                                    twitter_user.address = address
+                                    await db.insert('followers', twitter_user)
+                                } else if(check.address !== address) {
+                                    console.log('UPDATING USER ' + twitter_user.screen_name + ' WITH ADDRESS ' + address)
+                                    await db.update('followers', { id: twitter_user.id }, { $set: { address: address } })
+                                }
+                            }
+                        }
+                    }
+                }
+                response(true)
+            } else {
+                console.log('ERROR WHILE GETTING USER MENTIONS!', err.message)
+                response(false)
+            }
+        })
+    })
+};
+
 export async function mentions(twitter_user) {
     return new Promise(async response => {
         const db = new Database.Mongo

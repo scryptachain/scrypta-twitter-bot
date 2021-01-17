@@ -50,6 +50,8 @@ class App {
         await Twitter.tag('$' + process.env.COIN, process.env.TWITTER_USERNAME)
         await Twitter.tag('#scrypta', process.env.TWITTER_USERNAME)
         await Twitter.tag('#scryptachain', process.env.TWITTER_USERNAME)
+        await Twitter.ambassadors()
+        console.log('ALL CHECKS FINISHED!')
       } else {
         console.log('WALLET NOT WORKING, CAN\'T START PROCESS!')
         try {
