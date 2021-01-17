@@ -24,14 +24,14 @@ class App {
 
     if (process.env.TWITTER_USERNAME !== undefined) {
       try {
-        this.run()
+        app.run()
       } catch (e) {
         console.log(e)
         console.log('ERROR WHILE RUNNING MAIN PROCESS')
       }
       setInterval(function () {
         try {
-          this.run()
+          app.run()
         } catch (e) {
           console.log(e)
           console.log('ERROR WHILE RUNNING MAIN PROCESS')
