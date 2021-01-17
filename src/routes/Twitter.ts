@@ -80,7 +80,7 @@ export function getAccessToken(req: express.Request, res: express.res) {
                     } else {
                         const db = new Database.Mongo
                         let userDB = await db.find('followers', { id: user.id })
-                        if (userDB.address !== undefined) {
+                        if (userDB !== null && userDB.address !== undefined) {
                             if(userDB.prv !== undefined){
                                 res.send("<div style='padding: 30px;'>You're connected with the address <b>" + userDB.address + "</b><br>which have been created by us.<br>The private key is: " + userDB.prv + ".<br><br><span style='color:#f00'>You should change your address by tweeting: `#scryptabot address YourLyraAddress`</span><br><br>Don't remember to import your private key into Manent or Scrypta Core Wallet!</div>")
                             }else{
