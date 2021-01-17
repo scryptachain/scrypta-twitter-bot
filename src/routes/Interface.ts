@@ -1,8 +1,7 @@
 import express = require("express")
-import * as Utilities from '../libs/Utilities'
+import * as Database from '../libs/Database'
 
 export function rendervue(req: express.Request, res: express.res) {
-
     let fs = require('fs')
     fs.readFile('index.html', null, function (error, data) {
         if (error) {
@@ -13,4 +12,12 @@ export function rendervue(req: express.Request, res: express.res) {
         }
         res.end();
     });
+};
+
+export function returnLastTips(req: express.Request, res: express.res) {
+    const db = new Database.Mongo
+    db.find('tips', {}, {timestamp: -1}).then(tips => {
+        console.log(tips)
+        res.send(tips)
+    })
 };

@@ -1,11 +1,10 @@
 import express = require("express")
 var twit = require('twit')
-import * as Database from '../libs/Database'
 var CoinKey = require('coinkey')
-import * as Crypto from '../libs/Crypto'
-var crypto = require('crypto');
 var twitterlogin = require("node-twitter-api")
-var config = require('../config.js');
+var config = require('../config.js')
+import * as Crypto from '../libs/Crypto'
+import * as Database from '../libs/Database'
 var testmode = process.env.TESTMODE.toLowerCase() == 'true' ? true : false;
 
 if (testmode === true) {
@@ -42,18 +41,14 @@ function sleep(ms) {
 }
 
 export function getAuth(req: express.Request, res: express.res) {
-    if (process.env.TWITTER_ACCESSTOKEN === undefined && process.env.TWITTER_TOKENSECRET === undefined) {
-        twtlogin.getRequestToken(function (err, requestToken, requestSecret) {
-            if (err)
-                res.status(500).send(err);
-            else {
-                _requestSecret = requestSecret;
-                res.redirect("https://api.twitter.com/oauth/authenticate?oauth_token=" + requestToken);
-            }
-        });
-    } else {
-        res.send({ error: "This bot is configured, to configure it again please remove TWITTER_ACCESSTOKEN and TWITTER_TOKENSECRET from your dotenv file." })
-    }
+    twtlogin.getRequestToken(function (err, requestToken, requestSecret) {
+        if (err)
+            res.status(500).send(err);
+        else {
+            _requestSecret = requestSecret;
+            res.redirect("https://api.twitter.com/oauth/authenticate?oauth_token=" + requestToken);
+        }
+    });
 }
 
 export function getAccessToken(req: express.Request, res: express.res) {
@@ -64,23 +59,37 @@ export function getAccessToken(req: express.Request, res: express.res) {
         if (err) {
             res.status(500).send(err);
         } else {
-            twtlogin.verifyCredentials(accessToken, accessSecret, function (err, user) {
+            twtlogin.verifyCredentials(accessToken, accessSecret, async function (err, user) {
                 if (err) {
                     res.status(500).send(err);
                 } else {
-                    res.send({
-                        user
-                    });
-                    const fs = require('fs');
-                    fs.appendFile('.env', "\r\n" + 'TWITTER_ACCESSTOKEN=' + accessToken, function (err) {
-                        console.log('ACCESS TOKEN WRITTEN')
-                    })
-                    fs.appendFile('.env', "\r\n" + 'TWITTER_TOKENSECRET=' + accessSecret, function (err) {
-                        console.log('TOKEN SECRET WRITTEN')
-                    })
-                    fs.appendFile('.env', "\r\n" + 'TWITTER_USERNAME=' + user.screen_name, function (err) {
-                        console.log('USERNAME WRITTEN')
-                    })
+                    if (process.env.TWITTER_ACCESSTOKEN === undefined) {
+                        res.send({
+                            user
+                        });
+                        const fs = require('fs');
+                        fs.appendFile('.env', "\r\n" + 'TWITTER_ACCESSTOKEN=' + accessToken, function (err) {
+                            console.log('ACCESS TOKEN WRITTEN')
+                        })
+                        fs.appendFile('.env', "\r\n" + 'TWITTER_TOKENSECRET=' + accessSecret, function (err) {
+                            console.log('TOKEN SECRET WRITTEN')
+                        })
+                        fs.appendFile('.env', "\r\n" + 'TWITTER_USERNAME=' + user.screen_name, function (err) {
+                            console.log('USERNAME WRITTEN')
+                        })
+                    } else {
+                        const db = new Database.Mongo
+                        let userDB = await db.find('followers', { id: user.id })
+                        if (userDB.address !== undefined) {
+                            if(userDB.prv !== undefined){
+                                res.send("<div style='padding: 30px;'>You're connected with the address <b>" + userDB.address + "</b><br>which have been created by us.<br>The private key is: " + userDB.prv + ".<br><br><span style='color:#f00'>You should change your address by tweeting: `#scryptabot address YourLyraAddress`</span><br><br>Don't remember to import your private key into Manent or Scrypta Core Wallet!</div>")
+                            }else{
+                                res.send("<div style='padding: 30px;'>You're connected with the address <b>" + userDB.address + "</b><br><br><span style='color:green'>Well done! You have connected your address :-)</span></div>")
+                            }
+                        } else {
+                            res.send("I'm sorry, but i can't find your user. Interact with @scryptachain or tweet your address tweeting `#scryptabot address YourLyraAddress`")
+                        }
+                    }
                 }
             });
         }
@@ -195,9 +204,7 @@ export async function ambassadors() {
                             console.log('--> CHECKING ' + exploded[j])
                             if (exploded[j].substr(0, 1) === 'L') {
                                 let address = exploded[j]
-                                console.log('ADDRESS FOUND!')
                                 var check = await db.find('followers', { id: twitter_user.id })
-                                console.log(check.address, address)
                                 if (check === null) {
                                     console.log('CREATING NEW FOLLWER WITH ADDRESS ' + address + '!')
                                     twitter_user.address = address
@@ -301,6 +308,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                 await db.insert('followers', twitter_user)
                 var user = await db.find('followers', { id: twitter_user.id })
             }
+
             var address = user.address
             var pubAddr = ''
 
@@ -308,65 +316,13 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                 //SEND TO ADDRESS
                 pubAddr = address
             } else {
-                
                 //CREATE ADDRESS FOR USER
                 var ck = CoinKey.createRandom(coinInfo)
-                var lyrapub = ck.publicAddress;
-                var lyraprv = ck.privateWif;
-                var lyrakey = ck.publicKey.toString('hex');
-                var buf = crypto.randomBytes(16);
-                var buf = crypto.randomBytes(16);
-                var password = buf.toString('hex');
-
-                var newwallet = {
-                    prv: lyraprv,
-                    key: lyrakey
-                };
-
-                const cipher = crypto.createCipher('aes-256-cbc', password);
-                let wallethex = cipher.update(JSON.stringify(newwallet), 'utf8', 'hex');
-                wallethex += cipher.final('hex');
-
-                var walletstore = lyrapub + ':' + wallethex;
-                var fs = require('fs');
-
-                fs.appendFile('public/ids/' + ck.publicAddress + '.sid', walletstore, function (err) {
-                    if (err) throw err;
-                    console.log('ADDRESS SUCCESSFULLY CREATED!');
-                });
-
-                var message_text = " Your Scrypta Account with LYRA Address are created!\r\n"
-                message_text += "All your reactions with our Twitter posts will receive a reward in LYRA on the address that we have just provided to you.\r\n"
-                message_text += "Now you can download your .sid file from here: https://faucet.scryptachain.org/ids/" + ck.publicAddress + ".sid\r\nUsing this file you can access in Scrypta dApps and manage your funds.\r\n\r\n"
-                message_text += "Please keep .sid file safe! if you lost it, you can&rsquo;t login into your Scrypta Account, so at your funds!\r\n\r\n"
-                message_text += "You can import .sid on\r\n"
-                message_text += "Scrypta Manent [Withdraw and send fuction]: https://manent.scryptachain.org\r\n"
-                message_text += "or import it in\r\nScryptaID [browser extension for manage your ID and access in all Scrypta dApps]: https://id.scryptachain.org\r\n"
-                message_text += "using this password: " + password + "\r\n\r\n"
-                message_text += "ATTENTION: We don't store that password so please SAFELY STORE where you prefer and DESTROY THIS MESSAGE! Keeps your funds SAFE! THIS MESSAGE WILL BE DESTROYED FROM OUR TWITTER FOR SECURITY REASON. NO ONE CAN RECOVER YOUR PASSWORD IF YOU LOSE OR FORGET IT.\r\n\r\n"
-                message_text += "ADDITIONAL INFO: - To receive LYRA bounty you must be have an active Twitter account since 1 MONTH  - You can react with our post and receive LYRA every " + process.env.MIN_TIMEFRAME + " minutes"
-
-                var result = await message(
-                    twitter_user.id_str,
-                    message_text
-                )
-
-                if (result === true) {
-                    pubAddr = ck.publicAddress
-                    await db.update('followers', { id: twitter_user.id }, { $set: { address: pubAddr } })
-                } else {
-                    if (testmode === false) {
-                        try{
-                            Twitter.post('statuses/update', { status: "@" + twitter_user.screen_name + " I wish send to you " + amount + ' $' + coin + ', but i can\'t see your address, please tweet it!' })
-                        }catch(e){
-                            console.log('ERROR POSTING STATUS')
-                        }
-                        // Twitter.post('statuses/update', { status: "@" + twitter_user.screen_name + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
-                    }
-                }
+                pubAddr = ck.publicAddress
+                await db.update('followers', { id: twitter_user.id }, { $set: { address: pubAddr, prv: ck.privateWif } })
             }
 
-            if (pubAddr !== '') {
+            if (address !== undefined) {
                 console.log('PUB ADDRESS IS ' + pubAddr)
                 var wallet = new Crypto.Wallet;
                 wallet.request('getinfo').then(function (info) {
@@ -375,15 +331,11 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                             var balance = info['result']['balance']
                             if (balance > amount) {
                                 console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + coin)
-                                wallet.request('sendtoaddress', [pubAddr, parseFloat(amount)]).then(function (txid) {
-                                    console.log(txid)
+                                wallet.request('sendtoaddress', [pubAddr, parseFloat(amount)]).then(async function (txid) {
                                     if (txid !== undefined && txid['result'] !== undefined && txid['result'].length === 64) {
-                                        db.insert('tips', { user_id: twitter_user.id, id: action_id, timestamp: new Date().getTime() })
-                                        message(
-                                            twitter_user.id,
-                                            "I've sent " + amount + " $" + coin + " to you! Check your TXID: " + txid['result'] + "!"
-                                        )
+                                        await db.insert('tips', { user_id: twitter_user.id, id: action_id, timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: address, txid: txid['result'] })
                                         console.log('TXID IS ' + txid['result'])
+                                        await post('Just sent ' + amount + ' $' + coin + ' to @' + twitter_user.screen_name)
                                         response(txid['result'])
                                     } else {
                                         console.log("ERROR WHILE SENDING TIP")
@@ -395,7 +347,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                                 response('ERROR')
                             }
                         } else {
-                            db.insert('tips', { user_id: twitter_user.id, timestamp: new Date().getTime() })
+                            db.insert('tips', { user_id: twitter_user.id, id: action_id, timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: address, txid: 'TXIDHASH' })
                             response('TXIDHASH')
                         }
                     } else {
@@ -408,10 +360,6 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                 response('ERROR')
             }
         } else {
-            /*var result = await message(
-                twitter_user.id,
-                'Not so fast! You must wait at least ' + process.env.MIN_TIMEFRAME + ' minutes between retweet or mention us to be rewarded!'
-            )*/
             console.log('USER WAS TIPPED IN THE PAST ' + process.env.MIN_TIMEFRAME + ' MINUTES, BAD LUCK!')
             response('BAD_LUCK')
         }
@@ -434,6 +382,24 @@ export async function message(twitter_user, message) {
                     response(false)
                 }
             })
+        } else {
+            response(true)
+        }
+    })
+}
+
+export async function post(message) {
+    return new Promise(async response => {
+        console.log('POSTING MESSAGE TO TWITTER')
+        const db = new Database.Mongo
+        if (testmode === false) {
+            try {
+                Twitter.post('statuses/update', { status: message })
+                response(true)
+            } catch (e) {
+                console.log('ERROR POSTING STATUS')
+                response(false)
+            }
         } else {
             response(true)
         }
