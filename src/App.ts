@@ -45,12 +45,12 @@ class App {
     wallet.request('getinfo').then(async info => {
       if (info !== undefined) {
         console.log('WALLET STATUS', info)
+        await Twitter.ambassadors()
         await Twitter.followers(process.env.TWITTER_USERNAME)
         await Twitter.mentions(process.env.TWITTER_USERNAME)
         await Twitter.tag('$' + process.env.COIN, process.env.TWITTER_USERNAME)
         await Twitter.tag('#scrypta', process.env.TWITTER_USERNAME)
         await Twitter.tag('#scryptachain', process.env.TWITTER_USERNAME)
-        await Twitter.ambassadors()
         console.log('ALL CHECKS FINISHED!')
       } else {
         console.log('WALLET NOT WORKING, CAN\'T START PROCESS!')
