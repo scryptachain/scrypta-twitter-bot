@@ -81,9 +81,9 @@ export function getAccessToken(req: express.Request, res: express.res) {
                         const db = new Database.Mongo
                         let userDB = await db.find('followers', { id: user.id })
                         if (userDB !== null && userDB.address !== undefined) {
-                            if(userDB.prv !== undefined){
+                            if (userDB.prv !== undefined) {
                                 res.send("<div style='padding: 30px;'>You're connected with the address <b>" + userDB.address + "</b><br>which have been created by us.<br>The private key is: " + userDB.prv + ".<br><br><span style='color:#f00'>You should change your address by tweeting: `#scryptabot address YourLyraAddress`</span><br><br>Don't remember to import your private key into Manent or Scrypta Core Wallet!</div>")
-                            }else{
+                            } else {
                                 res.send("<div style='padding: 30px;'>You're connected with the address <b>" + userDB.address + "</b><br><br><span style='color:green'>Well done! You have connected your address :-)</span></div>")
                             }
                         } else {
@@ -188,7 +188,7 @@ export async function tag(tag, twitter_user) {
     })
 };
 
-export async function ambassadors() {
+export async function commands() {
     return new Promise(async response => {
         const db = new Database.Mongo
         console.log('LOOKING FOR DIRECT COMMANDS UPDATES.')
@@ -221,6 +221,27 @@ export async function ambassadors() {
                                         "Compliments, your address is now updated with " + address + "!"
                                     )
                                 }
+                            }
+                        }
+                    } else if (text.indexOf('tip') !== -1) {
+                        let exploded = text.split(' ')
+                        for (let j in exploded) {
+                            console.log('--> CHECKING ' + exploded[j])
+                            if (exploded[j].substr(0, 1) === '@') {
+                                let totip_screenname = exploded[j].replace('@', '')
+                                let totip_user = await db.find('followers', { screen_name: totip_screenname })
+                                if (check === null) {
+                                    console.log('CREATING NEW TIPPED USER @' + totip_screenname + '!')
+                                    totip_user = await Twitter.get('users/show', { screen_name: '#scryptabot' })
+                                    var ck = CoinKey.createRandom(coinInfo)
+                                    totip_user.address = ck.publicAddress
+                                    totip_user.prv = ck.privateWif
+                                    await db.insert('followers', totip_user)
+                                    totip_user = await db.find('followers', { screen_name: totip_screenname })
+                                }
+
+                                // TODO: Send from twitter user to mentioned user
+                                // TODO: Send a public message where A sent to B
                             }
                         }
                     }

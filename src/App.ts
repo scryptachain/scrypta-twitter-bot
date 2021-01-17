@@ -45,7 +45,7 @@ class App {
     wallet.request('getinfo').then(async info => {
       if (info !== undefined) {
         console.log('WALLET STATUS', info)
-        await Twitter.ambassadors()
+        await Twitter.commands()
         await Twitter.followers(process.env.TWITTER_USERNAME)
         await Twitter.mentions(process.env.TWITTER_USERNAME)
         await Twitter.tag('$' + process.env.COIN, process.env.TWITTER_USERNAME)
