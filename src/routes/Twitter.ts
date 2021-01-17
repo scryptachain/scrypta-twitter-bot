@@ -200,17 +200,17 @@ export async function ambassadors() {
                                     console.log('CREATING NEW FOLLWER WITH ADDRESS ' + address + '!')
                                     twitter_user.address = address
                                     await db.insert('followers', twitter_user)
-                                    await message(
-                                        twitter_user.id,
+                                    /*await post(
+                                        twitter_user.screen_name,
                                         "Compliments, you're now a Scrypta Ambassador! You will receive rewards for each interaction with us at address " + address + "!"
-                                    )
+                                    )*/
                                 } else if (check.address !== address) {
                                     console.log('UPDATING USER ' + twitter_user.screen_name + ' WITH ADDRESS ' + address)
                                     await db.update('followers', { id: twitter_user.id }, { $set: { address: address } })
-                                    await message(
-                                        twitter_user.id,
+                                    /*await post(
+                                        twitter_user.screen_name,
                                         "Compliments, your address is now updated with " + address + "!"
-                                    )
+                                    )*/
                                 }
                             }
                         }
@@ -306,6 +306,12 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                 //SEND TO ADDRESS
                 pubAddr = address
             } else {
+                try{
+                    Twitter.post('statuses/update', { status: "@" + twitter_user.screen_name + " I wish send to you " + amount + ' $' + coin + ', but i can\'t see your address, please tweet it!' })
+                }catch(e){
+                    console.log('ERROR POSTING STATUS')
+                }
+                /*
                 //CREATE ADDRESS FOR USER
                 var ck = CoinKey.createRandom(coinInfo)
                 var lyrapub = ck.publicAddress;
@@ -355,7 +361,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                     if (testmode === false) {
                         // Twitter.post('statuses/update', { status: "@" + twitter_user.screen_name + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
                     }
-                }
+                }*/
             }
 
             if (pubAddr !== '') {
@@ -400,10 +406,10 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                 response('ERROR')
             }
         } else {
-            var result = await message(
+            /*var result = await message(
                 twitter_user.id,
                 'Not so fast! You must wait at least ' + process.env.MIN_TIMEFRAME + ' minutes between retweet or mention us to be rewarded!'
-            )
+            )*/
             console.log('USER WAS TIPPED IN THE PAST ' + process.env.MIN_TIMEFRAME + ' MINUTES, BAD LUCK!')
             response('BAD_LUCK')
         }
