@@ -22,49 +22,45 @@ class App {
     app.express.get('/twitter/request-token', Twitter.getAuth)
     app.express.get('/twitter/callback', Twitter.getAccessToken)
 
-    var wallet = new Crypto.Wallet;
-
     if (process.env.TWITTER_USERNAME !== undefined) {
-      wallet.request('getinfo').then(info => {
-        if (info !== undefined) {
-          console.log('WALLET STATUS', info)
-          Twitter.followers(process.env.TWITTER_USERNAME)
-          Twitter.mentions(process.env.TWITTER_USERNAME)
-        } else {
-          console.log('WALLET NOT WORKING, CAN\'T START PROCESS!')
-          try {
-            console.log('Running wallet.')
-            exec.exec('lyrad', {
-              stdio: 'ignore',
-              detached: true
-            }).unref()
-          } catch (e) {
-            console.log("Can\'t run wallet, please run it manually!")
-          }
-        }
-      })
-
+      try {
+        this.run()
+      } catch (e) {
+        console.log(e)
+        console.log('ERROR WHILE RUNNING MAIN PROCESS')
+      }
       setInterval(function () {
-        wallet.request('getinfo').then(info => {
-          if (info !== undefined) {
-            console.log('WALLET STATUS', info)
-            Twitter.followers(process.env.TWITTER_USERNAME)
-            Twitter.mentions(process.env.TWITTER_USERNAME)
-          } else {
-            console.log('WALLET NOT WORKING, CAN\'T START PROCESS!')
-            try {
-              console.log('Running wallet.')
-              exec.exec('lyrad', {
-                stdio: 'ignore',
-                detached: true
-              }).unref()
-            } catch (e) {
-              console.log("Can\'t run wallet, please run it manually!")
-            }
-          }
-        })
+        try {
+          this.run()
+        } catch (e) {
+          console.log(e)
+          console.log('ERROR WHILE RUNNING MAIN PROCESS')
+        }
       }, 180000)
     }
+  }
+
+  run() {
+    var wallet = new Crypto.Wallet;
+    wallet.request('getinfo').then(async info => {
+      if (info !== undefined) {
+        console.log('WALLET STATUS', info)
+        await Twitter.followers(process.env.TWITTER_USERNAME)
+        await Twitter.mentions(process.env.TWITTER_USERNAME)
+        await Twitter.cashtags(process.env.COIN, process.env.TWITTER_USERNAME)
+      } else {
+        console.log('WALLET NOT WORKING, CAN\'T START PROCESS!')
+        try {
+          console.log('Running wallet.')
+          exec.exec('lyrad', {
+            stdio: 'ignore',
+            detached: true
+          }).unref()
+        } catch (e) {
+          console.log("Can\'t run wallet, please run it manually!")
+        }
+      }
+    })
   }
 }
 

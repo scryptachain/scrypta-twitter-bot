@@ -1,14 +1,9 @@
 import express = require("express")
 var twit = require('twit')
-var redis = require("redis")
-var db = redis.createClient()
-const { promisify } = require('util')
-const getmembers = promisify(db.smembers).bind(db)
-const get = promisify(db.get).bind(db)
+import * as Database from '../libs/Database'
 var CoinKey = require('coinkey')
 import * as Crypto from '../libs/Crypto'
 var crypto = require('crypto');
-var axios = require('axios');
 var twitterlogin = require("node-twitter-api")
 var config = require('../config.js');
 var testmode = process.env.TESTMODE.toLowerCase() == 'true' ? true : false;
@@ -86,73 +81,78 @@ export function getAccessToken(req: express.Request, res: express.res) {
 }
 
 export async function followers(twitter_user) {
-    console.log('LOOKING FOR @' + twitter_user + ' FOLLOWER')
-    var tipped = await getmembers('FOLLOW_' + twitter_user)
-    Twitter.get('followers/list', { screen_name: twitter_user, count: 30 }, function (err, data) {
-        if (!err) {
-            var followers = data.users
-            var newfollowers = 0
-            for (var index in followers) {
-                var user_follow = followers[index].screen_name
-                var user_mention_followers = followers[index].followers_count
-                if (user_mention_followers >= process.env.MIN_FOLLOWERS) {
-                    if (tipped.indexOf(user_follow) === -1) {
-                        var user_registration = new Date(followers[index].created_at)
-                        var now = new Date();
-                        var diff = now.getTime() - user_registration.getTime();
-                        var elapsed = diff / (1000 * 60 * 60 * 24)
-                        if (elapsed >= parseInt(process.env.MIN_DAYS)) {
-                            newfollowers++
-                            console.log('NEW FOLLOWER: ' + user_follow + '!')
-                            db.set('USER_' + user_follow, followers[index].id_str)
-                            db.sadd('FOLLOW_' + twitter_user, user_follow)
-                            tipuser(user_follow, 'FOLLOW', twitter_user, process.env.TIP_FOLLOW, process.env.COIN)
-                        } else {
-                            console.log('USER ' + user_follow + ' IS TOO YOUNG.')
+    return new Promise(async response => {
+        const db = new Database.Mongo
+        console.log('LOOKING FOR @' + twitter_user + ' FOLLOWERS')
+        Twitter.get('followers/list', { screen_name: twitter_user, count: 30 }, async function (err, data) {
+            if (!err) {
+                var followers = data.users
+                var newfollowers = 0
+                for (var index in followers) {
+                    var user_follow = followers[index].id
+                    var user_mention_followers = followers[index].followers_count
+                    if (user_mention_followers >= process.env.MIN_FOLLOWERS) {
+                        let check = await db.find('followers', { id: user_follow })
+                        if (check === null || check.address === undefined) {
+                            var user_registration = new Date(followers[index].created_at)
+                            var now = new Date();
+                            var diff = now.getTime() - user_registration.getTime();
+                            var elapsed = diff / (1000 * 60 * 60 * 24)
+                            if (elapsed >= parseInt(process.env.MIN_DAYS)) {
+                                newfollowers++
+                                console.log('NEW FOLLOWER: ' + followers[index].screen_name + '!')
+                                await tipuser(followers[index], 'FOLLOW', twitter_user, process.env.TIP_FOLLOW, process.env.COIN)
+                            } else {
+                                console.log('USER ' + user_follow + ' IS TOO YOUNG.')
+                            }
                         }
+                    } else {
+                        console.log('USER ' + followers[index].screen_name + ' DON\'T HAVE THE REQUIRED FOLLOWERS (' + user_mention_followers + ')')
                     }
-                } else {
-                    console.log('USER ' + user_follow + ' DON\'T HAVE THE REQUIRED FOLLOWERS (' + user_mention_followers + ')')
                 }
+                console.log('FOUND ' + newfollowers + ' NEW FOLLOWERS!')
+                response(true)
+            } else {
+                console.log('ERROR WHILE GETTING FOLLOWERS LIST!', err.message)
+                response(false)
             }
-            console.log('FOUND ' + newfollowers + ' NEW FOLLOWERS!')
-        } else {
-            console.log('ERROR WHILE GETTING FOLLOWERS LIST!', err.message)
-        }
+        })
     })
 };
 
-export async function mentions(twitter_user) {
-    console.log('LOOKING FOR @' + twitter_user + ' MENTIONS')
-
-    Twitter.get('search/tweets', { q: '@' + twitter_user }, async function (err, data) {
-        if (!err) {
-            var found = data.statuses
-            var mentions = []
-            for (var index in found) {
-                if (found[index].user !== twitter_user) {
-                    mentions.push(found[index])
+export async function cashtags(tag, twitter_user) {
+    return new Promise(async response => {
+        const db = new Database.Mongo
+        console.log('LOOKING FOR @' + tag + ' CASHTAG')
+        Twitter.get('search/tweets', { q: '$' + tag }, async function (err, data) {
+            if (!err) {
+                var found = data.statuses
+                var mentions = []
+                for (var index in found) {
+                    if (found[index].user !== twitter_user) {
+                        mentions.push(found[index])
+                    }
                 }
-            }
-            var newmentions = 0
-            for (var index in mentions) {
-                var tipped = await getmembers('MENTIONS_' + twitter_user)
-                //console.log(mentions[index])
-                var user_mention = mentions[index].user.screen_name
-                var user_mention_followers = mentions[index].user.followers_count
-                if (mentions[index].retweeted_status !== undefined) {
+                var newmentions = 0
+                for (var index in mentions) {
+                    // console.log('\x1b[42m%s\x1b[0m', mentions[index].text,  mentions[index].user.screen_name)
+                    var user_mention = mentions[index].user.screen_name
+                    var user_id = mentions[index].user.id
+                    var user_mention_followers = mentions[index].user.followers_count
                     if (user_mention_followers >= process.env.MIN_FOLLOWERS) {
                         var mention_id = mentions[index]['id_str']
-                        if (tipped.indexOf(mention_id) === -1 && user_mention !== process.env.TWITTER_USERNAME) {
+                        var tipped = await db.find('mentions', { mention_id: mention_id, user_id: user_id })
+                        if (tipped === null && user_mention !== process.env.TWITTER_USERNAME) {
                             var user_registration = new Date(mentions[index].user.created_at)
                             var now = new Date();
                             var diff = now.getTime() - user_registration.getTime();
                             var elapsed = diff / (1000 * 60 * 60 * 24)
                             if (elapsed > parseInt(process.env.MIN_DAYS)) {
-                                newmentions++
-                                db.set('USER_' + user_mention, mentions[index].user.id_str)
-                                db.sadd('MENTIONS_' + twitter_user, mention_id)
-                                await tipuser(user_mention, 'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN)
+                                let tip = await tipuser(mentions[index].user, 'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN)
+                                if (tip !== 'ERROR') {
+                                    newmentions++
+                                    await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                                }
                             } else {
                                 console.log('USER ' + user_mention + ' IS TOO YOUNG.')
                             }
@@ -160,37 +160,95 @@ export async function mentions(twitter_user) {
                     } else {
                         console.log('USER ' + user_mention + ' DON\'T HAVE THE REQUIRED FOLLOWERS (' + user_mention_followers + ')')
                     }
-                } else {
-                    console.log('THIS IS A COMMENT, WE DON\'T REWARD FOR COMMENTS')
                 }
+                console.log('FOUND ' + newmentions + ' NEW CASHTAGS MENSIONS')
+                response(true)
+            } else {
+                console.log('ERROR WHILE GETTING USER MENTIONS!', err.message)
+                response(false)
             }
-            console.log('FOUND ' + newmentions + ' NEW MENTIONS')
-        } else {
-            console.log('ERROR WHILE GETTING USER MENTIONS!', err.message)
-        }
+        })
     })
 };
 
-export async function tipuser(twitter_user, action, id = '', amount, coin) {
+export async function mentions(twitter_user) {
     return new Promise(async response => {
-        console.log('\x1b[32m%s\x1b[0m', 'TIPPING USER ' + twitter_user + ' WITH ' + amount + ' ' + coin + ' FOR ' + action + '!')
-        var last_tip = await get('LAST_TIP_' + twitter_user)
+        const db = new Database.Mongo
+        console.log('LOOKING FOR @' + twitter_user + ' MENTIONS')
+        Twitter.get('search/tweets', { q: '@' + twitter_user }, async function (err, data) {
+            if (!err) {
+                var found = data.statuses
+                var mentions = []
+                for (var index in found) {
+                    if (found[index].user !== twitter_user) {
+                        mentions.push(found[index])
+                    }
+                }
+                var newmentions = 0
+                for (var index in mentions) {
+                    // console.log('\x1b[44m%s\x1b[0m', mentions[index].text)
+                    var user_mention = mentions[index].user.screen_name
+                    var user_id = mentions[index].user.id
+                    var user_mention_followers = mentions[index].user.followers_count
+                    if (user_mention_followers >= process.env.MIN_FOLLOWERS) {
+                        var mention_id = mentions[index]['id_str']
+                        var tipped = await db.find('mentions', { mention_id: mention_id, user_id: user_id })
+                        if (tipped === null && user_mention !== process.env.TWITTER_USERNAME) {
+                            var user_registration = new Date(mentions[index].user.created_at)
+                            var now = new Date();
+                            var diff = now.getTime() - user_registration.getTime();
+                            var elapsed = diff / (1000 * 60 * 60 * 24)
+                            if (elapsed > parseInt(process.env.MIN_DAYS)) {
+                                let tip = await tipuser(mentions[index].user, 'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN)
+                                if (tip !== 'ERROR') {
+                                    newmentions++
+                                    await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                                }
+                            } else {
+                                console.log('USER ' + user_mention + ' IS TOO YOUNG.')
+                            }
+                        }
+                    } else {
+                        console.log('USER ' + user_mention + ' DON\'T HAVE THE REQUIRED FOLLOWERS (' + user_mention_followers + ')')
+                    }
+                }
+                console.log('FOUND ' + newmentions + ' NEW MENTIONS')
+                response(true)
+            } else {
+                console.log('ERROR WHILE GETTING USER MENTIONS!', err.message)
+                response(false)
+            }
+        })
+    })
+};
+
+export async function tipuser(twitter_user, action, action_id, amount, coin) {
+    const db = new Database.Mongo
+    return new Promise(async response => {
+        console.log('\x1b[32m%s\x1b[0m', 'TIPPING USER ' + twitter_user.screen_name + ' WITH ' + amount + ' ' + coin + ' FOR ' + action + '!')
+        var last_tip = await db.find('tips', { user_id: twitter_user.id }, { timestamp: -1 })
         var eligible = false
-        if (last_tip === null) {
+        if (last_tip[0] === undefined) {
             eligible = true
         } else {
             var now = new Date().getTime()
-            var elapsed = (now - last_tip) / (1000 * 60)
+            var elapsed = (now - last_tip[0].timestamp) / (1000 * 60)
             if (elapsed >= parseInt(process.env.MIN_TIMEFRAME)) {
                 eligible = true
             }
         }
 
         if (eligible === true) {
-            var address = await get('ADDRESS_' + twitter_user)
+            var user = await db.find('followers', { id: twitter_user.id })
+            if (user === null) {
+                console.log('CREATING NEW FOLLWER!')
+                await db.insert('followers', twitter_user)
+                var user = await db.find('followers', { id: twitter_user.id })
+            }
+            var address = user.address
             var pubAddr = ''
 
-            if (address !== null) {
+            if (address !== undefined) {
                 //SEND TO ADDRESS
                 pubAddr = address
             } else {
@@ -232,13 +290,13 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 message_text += "ADDITIONAL INFO: - To receive LYRA bounty you must be have an active Twitter account since 1 MONTH  - You can react with our post and receive LYRA every " + process.env.MIN_TIMEFRAME + " minutes"
 
                 var result = await message(
-                    twitter_user,
+                    twitter_user.id,
                     message_text
                 )
 
                 if (result === true) {
                     pubAddr = ck.publicAddress
-                    db.set('ADDRESS_' + twitter_user, pubAddr)
+                    await db.update('followers', { id: twitter_user.id }, { $set: { address: pubAddr } })
                 } else {
                     if (testmode === false) {
                         Twitter.post('statuses/update', { status: "@" + twitter_user + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
@@ -249,19 +307,18 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
             if (pubAddr !== '') {
                 console.log('PUB ADDRESS IS ' + pubAddr)
                 var wallet = new Crypto.Wallet;
-                var timestamp = new Date().getTime()
                 wallet.request('getinfo').then(function (info) {
                     if (info !== undefined) {
-                        var balance = info['result']['balance']
-                        if (balance > amount) {
-                            console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + coin)
-                            if (testmode === false) {
+                        if (testmode === false) {
+                            var balance = info['result']['balance']
+                            if (balance > amount) {
+                                console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + coin)
                                 wallet.request('sendtoaddress', [pubAddr, parseFloat(amount)]).then(function (txid) {
                                     console.log(txid)
                                     if (txid !== undefined && txid['result'] !== undefined && txid['result'].length === 64) {
-                                        db.set('LAST_TIP_' + twitter_user, timestamp)
+                                        db.insert('tips', { user_id: twitter_user.id, id: action_id, timestamp: new Date().getTime() })
                                         message(
-                                            twitter_user,
+                                            twitter_user.id,
                                             "I've sent " + amount + " $" + coin + " to you! Check your TXID: " + txid['result'] + "!"
                                         )
                                         console.log('TXID IS ' + txid['result'])
@@ -272,24 +329,29 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                                     }
                                 })
                             } else {
-                                response('TXIDHASH')
+                                console.log('OPS, NOT ENOUGH FUNDS!')
+                                response('ERROR')
                             }
                         } else {
-                            console.log('OPS, NOT ENOUGH FUNDS!')
-                            response('ERROR')
+                            db.insert('tips', { user_id: twitter_user.id, timestamp: new Date().getTime() })
+                            response('TXIDHASH')
                         }
                     } else {
                         console.log('WALLET NOT WORKING')
                         response('ERROR')
                     }
                 })
+            } else {
+                console.log("USER IS WITHOUT ADDRESS")
+                response('ERROR')
             }
         } else {
             var result = await message(
-                twitter_user,
+                twitter_user.id,
                 'Not so fast! You must wait at least ' + process.env.MIN_TIMEFRAME + ' minutes between retweet or mention us to be rewarded!'
             )
             console.log('USER WAS TIPPED IN THE PAST ' + process.env.MIN_TIMEFRAME + ' MINUTES, BAD LUCK!')
+            response('BAD_LUCK')
         }
     })
 }
@@ -297,23 +359,18 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
 export async function message(twitter_user, message) {
     return new Promise(async response => {
         console.log('SENDING MESSAGE TO ' + twitter_user)
-        var twitter_id = await get("USER_" + twitter_user)
-        if (twitter_id !== null) {
-            if (testmode === false) {
-                var msg = { "event": { "type": "message_create", "message_create": { "target": { "recipient_id": twitter_id }, "message_data": { "text": message } } } }
-                Twitter.post('direct_messages/events/new', msg, function (err, data) {
-                    if (data.event !== undefined) {
-                        response(true)
-                    } else {
-                        response(false)
-                    }
-                })
-            } else {
-                response(true)
-            }
+        const db = new Database.Mongo
+        if (testmode === false) {
+            var msg = { "event": { "type": "message_create", "message_create": { "target": { "recipient_id": twitter_user }, "message_data": { "text": message } } } }
+            Twitter.post('direct_messages/events/new', msg, function (err, data) {
+                if (data.event !== undefined) {
+                    response(true)
+                } else {
+                    response(false)
+                }
+            })
         } else {
-            response(false)
-            console.log("CAN'T FIND USER ID")
+            response(true)
         }
     })
 }
