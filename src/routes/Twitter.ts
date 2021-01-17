@@ -195,22 +195,24 @@ export async function ambassadors() {
                             console.log('--> CHECKING ' + exploded[j])
                             if (exploded[j].substr(0, 1) === 'L') {
                                 let address = exploded[j]
+                                console.log('ADDRESS FOUND!')
                                 var check = await db.find('followers', { id: twitter_user.id })
+                                console.log(check.address, address)
                                 if (check === null) {
                                     console.log('CREATING NEW FOLLWER WITH ADDRESS ' + address + '!')
                                     twitter_user.address = address
                                     await db.insert('followers', twitter_user)
-                                    /*await post(
-                                        twitter_user.screen_name,
+                                    await message(
+                                        twitter_user.id_str,
                                         "Compliments, you're now a Scrypta Ambassador! You will receive rewards for each interaction with us at address " + address + "!"
-                                    )*/
+                                    )
                                 } else if (check.address !== address) {
                                     console.log('UPDATING USER ' + twitter_user.screen_name + ' WITH ADDRESS ' + address)
                                     await db.update('followers', { id: twitter_user.id }, { $set: { address: address } })
-                                    /*await post(
-                                        twitter_user.screen_name,
+                                    await message(
+                                        twitter_user.id_str,
                                         "Compliments, your address is now updated with " + address + "!"
-                                    )*/
+                                    )
                                 }
                             }
                         }
@@ -306,12 +308,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                 //SEND TO ADDRESS
                 pubAddr = address
             } else {
-                try{
-                    Twitter.post('statuses/update', { status: "@" + twitter_user.screen_name + " I wish send to you " + amount + ' $' + coin + ', but i can\'t see your address, please tweet it!' })
-                }catch(e){
-                    console.log('ERROR POSTING STATUS')
-                }
-                /*
+                
                 //CREATE ADDRESS FOR USER
                 var ck = CoinKey.createRandom(coinInfo)
                 var lyrapub = ck.publicAddress;
@@ -350,7 +347,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                 message_text += "ADDITIONAL INFO: - To receive LYRA bounty you must be have an active Twitter account since 1 MONTH  - You can react with our post and receive LYRA every " + process.env.MIN_TIMEFRAME + " minutes"
 
                 var result = await message(
-                    twitter_user.id,
+                    twitter_user.id_str,
                     message_text
                 )
 
@@ -359,9 +356,14 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                     await db.update('followers', { id: twitter_user.id }, { $set: { address: pubAddr } })
                 } else {
                     if (testmode === false) {
+                        try{
+                            Twitter.post('statuses/update', { status: "@" + twitter_user.screen_name + " I wish send to you " + amount + ' $' + coin + ', but i can\'t see your address, please tweet it!' })
+                        }catch(e){
+                            console.log('ERROR POSTING STATUS')
+                        }
                         // Twitter.post('statuses/update', { status: "@" + twitter_user.screen_name + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
                     }
-                }*/
+                }
             }
 
             if (pubAddr !== '') {
@@ -428,7 +430,6 @@ export async function message(twitter_user, message) {
                     response(true)
                 } else {
                     console.log("Can't send message to user, sorry.")
-                    console.log(err)
                     await sleep(10000)
                     response(false)
                 }
