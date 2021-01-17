@@ -33,9 +33,9 @@ if (process.env.TWITTER_CONSUMERKEY !== undefined && process.env.TWITTER_CONSUME
     console.log('\x1b[41m%s\x1b[0m', 'SETUP TWITTER FIRST!')
 }
 
-function sleep(ms){
+function sleep(ms) {
     return new Promise(response => {
-        setTimeout(function (){
+        setTimeout(function () {
             response(true)
         }, ms)
     })
@@ -204,7 +204,7 @@ export async function ambassadors() {
                                         twitter_user.id,
                                         "Compliments, you're now a Scrypta Ambassador! You will receive rewards for each interaction with us at address " + address + "!"
                                     )
-                                } else if(check.address !== address) {
+                                } else if (check.address !== address) {
                                     console.log('UPDATING USER ' + twitter_user.screen_name + ' WITH ADDRESS ' + address)
                                     await db.update('followers', { id: twitter_user.id }, { $set: { address: address } })
                                     await message(
@@ -353,7 +353,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                     await db.update('followers', { id: twitter_user.id }, { $set: { address: pubAddr } })
                 } else {
                     if (testmode === false) {
-                        Twitter.post('statuses/update', { status: "@" + twitter_user.screen_name + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
+                        // Twitter.post('statuses/update', { status: "@" + twitter_user.screen_name + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
                     }
                 }
             }
