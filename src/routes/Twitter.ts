@@ -259,7 +259,7 @@ export async function commands() {
                                                         let temp = await scrypta.importPrivateKey(sender_user.prv, '-', false)
                                                         let sent = await scrypta.send(temp.walletstore, '-', totip_user.address, amount)
                                                         if (sent !== false && sent !== null && sent.length === 64) {
-                                                            await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: 'LYRA', channel: 'TWITTER', address: totip_user.address, txid: sent })
+                                                            await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: 'LYRA', channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
                                                             await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $LYRA to @' + totip_user.screen_name + '. Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
                                                         } else {
                                                             console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
@@ -347,7 +347,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
     const db = new Database.Mongo
     return new Promise(async response => {
         console.log('\x1b[32m%s\x1b[0m', 'TIPPING USER ' + twitter_user.screen_name + ' WITH ' + amount + ' ' + coin + ' FOR ' + action + '!')
-        var last_tip = await db.find('tips', { user_id: twitter_user.id }, { timestamp: -1 })
+        var last_tip = await db.find('tips', { user_id: twitter_user.id, source: 'BOT' }, { timestamp: -1 })
         var eligible = false
         if (last_tip[0] === undefined) {
             eligible = true
@@ -392,7 +392,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                                 console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + coin)
                                 wallet.request('sendtoaddress', [pubAddr, parseFloat(amount)]).then(async function (txid) {
                                     if (txid !== undefined && txid['result'] !== undefined && txid['result'].length === 64) {
-                                        await db.insert('tips', { user_id: twitter_user.id, id: action_id, timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: address, txid: txid['result'] })
+                                        await db.insert('tips', { user_id: twitter_user.id, id: action_id, timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: address, txid: txid['result'], source: 'BOT' })
                                         console.log('TXID IS ' + txid['result'])
                                         await post('Just sent ' + amount + ' $' + coin + ' to @' + twitter_user.screen_name + '. Check the transaction at https://bb.scryptachain.org/tx/' + txid['result'] + '!')
                                         response(txid['result'])
@@ -406,7 +406,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                                 response('ERROR')
                             }
                         } else {
-                            db.insert('tips', { user_id: twitter_user.id, id: action_id, timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: address, txid: 'TXIDHASH' })
+                            db.insert('tips', { user_id: twitter_user.id, id: action_id, timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: address, txid: 'TXIDHASH', source: 'BOT' })
                             response('TXIDHASH')
                         }
                     } else {
