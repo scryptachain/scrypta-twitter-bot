@@ -165,7 +165,7 @@ export async function tag(tag, twitter_user) {
                     if (user_mention_followers >= process.env.MIN_FOLLOWERS) {
                         var mention_id = mentions[index]['id_str']
                         var tipped = await db.find('mentions', { mention_id: mention_id, user_id: user_id })
-                        if (tipped === null && user_mention !== process.env.TWITTER_USERNAME) {
+                        if (tipped === null && user_mention !== process.env.TWITTER_USERNAME && user_mention !== process.env.TWITTER_BOT) {
                             var user_registration = new Date(mentions[index].user.created_at)
                             var now = new Date();
                             var diff = now.getTime() - user_registration.getTime();
@@ -314,7 +314,7 @@ export async function mentions(twitter_user) {
                     if (user_mention_followers >= process.env.MIN_FOLLOWERS) {
                         var mention_id = mentions[index]['id_str']
                         var tipped = await db.find('mentions', { mention_id: mention_id, user_id: user_id })
-                        if (tipped === null && user_mention !== process.env.TWITTER_USERNAME) {
+                        if (tipped === null && user_mention !== process.env.TWITTER_USERNAME && user_mention !== process.env.TWITTER_BOT) {
                             var user_registration = new Date(mentions[index].user.created_at)
                             var now = new Date();
                             var diff = now.getTime() - user_registration.getTime();
