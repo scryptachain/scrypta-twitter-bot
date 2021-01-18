@@ -83,12 +83,17 @@ export function getAccessToken(req: express.Request, res: express.res) {
                         let userDB = await db.find('followers', { id: user.id })
                         if (userDB !== null && userDB.address !== undefined) {
                             if (userDB.prv !== undefined) {
-                                res.send("<div style='padding: 30px;'>You're connected with the address <b>" + userDB.address + "</b><br>which have been created by us.<br>The private key is: " + userDB.prv + ".<br><br><span style='color:#f00'>You should change your address by tweeting: `#scryptabot address YourLyraAddress`</span><br><br>Don't remember to import your private key into Manent or Scrypta Core Wallet!</div>")
+                                res.send("<div style='padding: 30px;'><h1>Well done!</h1>You're connected with the address <b>" + userDB.address + "</b><br>which have been created by us.<br><br>The private key is: " + userDB.prv + ".<br><br><span style='color:#f00'>You should change your address by tweeting: `#scryptabot address YourLyraAddress`</span><br><br>Don't forget to import your private key into Manent or Scrypta Core Wallet!</div>")
                             } else {
-                                res.send("<div style='padding: 30px;'>You're connected with the address <b>" + userDB.address + "</b><br><br><span style='color:green'>Well done! You have connected your address :-)</span></div>")
+                                res.send("<div style='padding: 30px;'><h1>Well done!</h1>You're connected with the address <b>" + userDB.address + "</b><br><br><span style='color:green'>Well done! You have connected your address :-)</span></div>")
                             }
                         } else {
-                            res.send("I'm sorry, but i can't find your user. Interact with @scryptachain or tweet your address tweeting `#scryptabot address YourLyraAddress`")
+                            var ck = CoinKey.createRandom(coinInfo)
+                            user.address = ck.publicAddress
+                            user.prv = ck.privateWif
+                            await db.insert('followers', user)
+                            userDB = await db.find('followers', { id: user.id })
+                            res.send("<div style='padding: 30px;'><h1>Well done!</h1>You've been subscribed with the address <b>" + userDB.address + "</b><br>which have been created by us.<br><br>The private key is: " + userDB.prv + ".<br><br><span style='color:#f00'>You should change your address by tweeting: `#scryptabot address YourLyraAddress`</span><br><br>Don't forget to import your private key into Manent or Scrypta Core Wallet!</div>")
                         }
                     }
                 }
