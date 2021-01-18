@@ -1456,7 +1456,7 @@ header .navbar-expand.relative {
 }
 
 header .navbar-expand .navbar-nav {
-    display: inline-block;
+    display: flex;
 }
 
 header .navbar-expand .navbar-nav.toggle {

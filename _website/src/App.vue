@@ -20,15 +20,20 @@
 
             <!-- Navbar Items -->
             <ul class="navbar-nav items">
-              <li class="nav-item dropdown">
-                <a href="#header" class="nav-link smooth-anchor"
-                  >Home</a>
+              <li class="nav-item">
+                <a href="#header" class="nav-link smooth-anchor">Home</a>
               </li>
               <li class="nav-item">
                 <a href="#about" class="nav-link smooth-anchor">About</a>
               </li>
               <li class="nav-item">
                 <a href="#how" class="nav-link smooth-anchor">How it Works</a>
+              </li>
+              <li class="nav-item">
+                <a href="#tools" class="nav-link smooth-anchor">Other functions</a>
+              </li>
+              <li class="nav-item">
+                <a href="#specs" class="nav-link smooth-anchor">Requirements</a>
               </li>
             </ul>
 
@@ -294,265 +299,110 @@
         </div>
       </section>
 
-      <!-- Contact -->
-      <section id="contact" class="section-4 odd form">
+      <!-- Tools -->
+      <section id="tools" class="section-3 highlights image-left">
         <div class="container">
-          <form
-            action="php/form.php"
-            id="leverage-form"
-            class="multi-step-form"
-          >
-            <input type="hidden" name="section" value="leverage_form" />
-
-            <div class="row">
-              <div
-                class="col-12 col-md-6 align-self-start text-center text-md-left"
-              >
-                <!-- Success Message -->
-                <div class="row success message">
-                  <div class="col-12 p-0">
-                    <div class="wait">
-                      <div class="spinner-grow" role="status">
-                        <span class="sr-only">Loading</span>
-                      </div>
-                      <h3 class="sending">SENDING</h3>
-                    </div>
-                    <div class="done">
-                      <i class="icon bigger icon-check"></i>
-                      <h3>Your message was sent successful. Thanks.</h3>
-                      <a href="" class="btn mx-auto primary-button">
-                        <i class="icon-refresh"></i>
-                        REFRESH
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Steps Message -->
-                <div class="row intro form-content">
-                  <div class="col-12 p-0">
-                    <!-- Step Title -->
-                    <div class="step-title">
-                      <h2 class="mb-0 super effect-static-text">Let's Talk?</h2>
-                      <p>
-                        Don't wait until tomorrow. Talk to one of our
-                        consultants today and learn how to start leveraging your
-                        business.
-                      </p>
-                    </div>
-
-                    <!-- Step Title -->
-                    <div class="step-title">
-                      <h2 class="mb-0 super effect-static-text">
-                        Almost There
-                      </h2>
-                      <p>
-                        We need some more important information to better
-                        understand how we can help you in the best possible way.
-                      </p>
-                    </div>
-
-                    <!-- Step Title -->
-                    <div class="step-title">
-                      <h2 class="mb-0 super effect-static-text">
-                        Are you Ready?
-                      </h2>
-                      <p>
-                        Tell us a little about the project you need to create.
-                        This is valuable so that we can direct you to the ideal
-                        team.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Steps Group -->
-                <div class="row text-center form-content">
-                  <div class="col-12 p-0">
-                    <ul class="progressbar">
-                      <li>Personal Details</li>
-                      <li>Company Budget</li>
-                      <li>Service Setup</li>
-                    </ul>
-
-                    <!-- Group 1 -->
-                    <fieldset class="step-group">
-                      <div class="row">
-                        <div class="col-12 input-group p-0">
-                          <input
-                            type="text"
-                            name="email"
-                            data-minlength="3"
-                            placeholder="Email"
-                          />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-12 input-group p-0">
-                          <input
-                            type="text"
-                            name="name"
-                            data-minlength="3"
-                            class="form-control field-name"
-                            placeholder="Name"
-                          />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-12 input-group p-0">
-                          <input
-                            type="text"
-                            name="phone"
-                            data-minlength="3"
-                            class="form-control field-phone"
-                            placeholder="Phone"
-                          />
-                        </div>
-                      </div>
-                      <div class="col-12 input-group p-0">
-                        <a class="step-next btn primary-button"
-                          >NEXT<i class="icon-arrow-right-circle left"></i
-                        ></a>
-                      </div>
-                    </fieldset>
-
-                    <!-- Group 2 -->
-                    <fieldset class="step-group">
-                      <div class="row">
-                        <div class="col-12 input-group p-0">
-                          <input
-                            type="text"
-                            name="company"
-                            data-minlength="3"
-                            class="form-control field-company"
-                            placeholder="Company"
-                          />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-12 input-group p-0">
-                          <input
-                            type="text"
-                            name="manager"
-                            data-minlength="3"
-                            class="form-control field-manager"
-                            placeholder="Manager"
-                          />
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-12 input-group p-0">
-                          <i class="icon-arrow-down"></i>
-                          <select
-                            name="budget"
-                            data-minlength="1"
-                            class="form-control field-budget"
-                          >
-                            <option value="" selected disabled>
-                              What's your budget range?
-                            </option>
-                            <option>Less than $2.000</option>
-                            <option>$2.000 — $5.000</option>
-                            <option>$5.000 — $10.000</option>
-                            <option>$10,000+</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div
-                        class="col-12 input-group p-0 d-flex justify-content-between justify-content-md-start"
-                      >
-                        <a class="step-prev btn primary-button mr-4"
-                          ><i class="icon-arrow-left-circle"></i>PREV</a
-                        >
-                        <a class="step-next btn primary-button"
-                          >NEXT<i class="icon-arrow-right-circle left"></i
-                        ></a>
-                      </div>
-                    </fieldset>
-
-                    <!-- Group 3 -->
-                    <fieldset class="step-group">
-                      <div class="row">
-                        <div class="col-12 input-group p-0">
-                          <textarea
-                            name="message"
-                            data-minlength="3"
-                            class="form-control field-message"
-                            placeholder="Message"
-                            required
-                          ></textarea>
-                        </div>
-                      </div>
-                      <div
-                        class="col-12 input-group p-0 d-flex justify-content-between justify-content-md-start"
-                      >
-                        <a class="step-prev btn primary-button mr-4"
-                          ><i class="icon-arrow-left-circle"></i>PREV</a
-                        >
-                        <a class="step-next btn primary-button"
-                          >SEND<i class="icon-arrow-right-circle left"></i
-                        ></a>
-                      </div>
-                    </fieldset>
-                  </div>
+          <div class="row">
+            <div class="gallery col-12 col-md-6">
+              <div>
+                <img
+                  src="assets/images/twitter_2.png"
+                  class="fit-image"
+                  alt="Scrypta Twitter Bot"
+                />
+              </div>
+            </div>
+            <div
+              class="col-12 col-md-6 pl-md-5 align-self-center text-center text-md-left"
+            >
+              <div class="row intro">
+                <div class="col-12 p-0">
+                  <h2
+                    data-aos="zoom-out-up"
+                    data-aos-delay="400"
+                    class="title effect-static-text"
+                  >
+                    Other Functions
+                  </h2>
+                  <p style="color: #f5f5f5">
+                    Explore other functions of Scrypta Twitter Bot. You can personalize your account and tips your friends!
+                  </p>
                 </div>
               </div>
-
-              <div
-                class="content-images col-12 col-md-6 pl-md-5 d-none d-md-block"
-              >
-                <!-- Step 1 -->
-                <div class="gallery">
-                  <a
-                    class="step-image"
-                    data-poster="assets/images/about-2.jpg"
-                    href="https://www.youtube.com/watch?v=7e90gBu4pas"
-                  >
-                    <i class="play-video icon-control-play"></i>
-                    <div class="mask-radius"></div>
-                    <img
-                      src="assets/images/about-2.jpg"
-                      class="fit-image"
-                      alt="Contact Us"
-                    />
-                  </a>
-                </div>
-
-                <!-- Step 2 -->
-                <div class="gallery">
-                  <a class="step-image" href="assets/images/about-3.jpg">
-                    <img
-                      src="assets/images/about-3.jpg"
-                      class="fit-image"
-                      alt="Contact Us"
-                    />
-                  </a>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="gallery">
-                  <a class="step-image" href="assets/images/about-4.jpg">
-                    <img
-                      src="assets/images/about-4.jpg"
-                      class="fit-image"
-                      alt="Contact Us"
-                    />
-                  </a>
-                </div>
-
-                <!-- Step 4 -->
-                <div class="gallery">
-                  <a class="step-image" href="assets/images/about-leverage.jpg">
-                    <img
-                      src="assets/images/about-leverage.jpg"
-                      class="fit-image"
-                      alt="Contact Us"
-                    />
-                  </a>
+              <div class="row items" style="color: #f5f5f5">
+                <div class="col-12 p-0">
+                  <div class="row item">
+                    <div class="col-12 col-md-2 align-self-center">
+                      <i class="icon icon-social-twitter"></i>
+                    </div>
+                    <div class="col-12 col-md-9 align-self-center">
+                      <h3 style="color: #1E50BC">Update your address</h3>
+                      <p>Write a simple post with your twitter account to change the address for receive rewards.</p>
+                      <h5 style="color: #84A5EB">#scryptabot address L.....</h5>
+                    </div>
+                  </div>
+                  <div class="row item">
+                    <div class="col-12 col-md-2 align-self-center">
+                      <span class="icon">@</span>
+                    </div>
+                    <div class="col-12 col-md-9 align-self-center">
+                      <h3 style="color: #1E50BC">Send a tip</h3>
+                      <p>Do you want send a tip at another user? You have just write a post, tag your friend and enter an amount!</p>
+                      <h5 style="color: #84A5EB">#scryptabot tip @user 1</h5>
+                      <em> <span style="color: #1E50BC; font-weight: 600; font-size: 35px;">* </span>Pay attention: if you change the address linked to the bot, you will not be able to use this function.</em>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- specs -->
+      <section id="specs" class="section-3 odd counter funfacts featured">
+        <div class="container">
+          <div class="row text-center intro">
+            <div class="col-12">
+              <h2>Some Rules</h2>
+              <p class="text-max-800">
+                In order to receive rewards in Lyra for interactions with our
+                official Twitter page, you will need to meet these requirements
+                and know a few specifications.
+              </p>
+            </div>
+          </div>
+          <div
+            data-aos-id="counter"
+            data-aos="fade-up"
+            data-aos-delay="200"
+            class="row justify-content-center text-center items"
+          >
+            <div class="col-12 col-md-6 col-lg-3 item">
+              <div data-percent="1" class="radial">
+                <span></span>
+              </div>
+              <h4>Account since 1 Month</h4>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3 item">
+              <div data-percent="15" class="radial">
+                <span></span>
+              </div>
+              <h4>Minutes per interaction</h4>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3 item">
+              <div data-percent="75" class="radial">
+                <span></span>
+              </div>
+              <h4>Minimum followers</h4>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3 item">
+              <div data-percent="1" class="radial">
+                <span></span>
+              </div>
+              <h4>1 LYRA per reaction</h4>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -705,11 +555,36 @@
                     class="col-12 col-lg-4 p-2 text-center text-lg-left item"
                   >
                     <h4 class="title">Masternodes & Staking Platforms</h4>
-                    <a href="https://thehub.host/" target="_blank" class="badge tag">The Hub</a>
-                    <a href="https://evonodes.com/pool/LYRA" target="_blank" class="badge tag">Evonode</a>
-                    <a href="https://node.trittium.cc/" target="_blank" class="badge tag">Trittium</a>
-                    <a href="https://midas.investments/shares" target="_blank" class="badge tag">Midas Investments</a>
-                    <a href="https://nodehub.io/dashboard/view_coin?coin=scrypta" target="_blank" class="badge tag">Node Hub</a>
+                    <a
+                      href="https://thehub.host/"
+                      target="_blank"
+                      class="badge tag"
+                      >The Hub</a
+                    >
+                    <a
+                      href="https://evonodes.com/pool/LYRA"
+                      target="_blank"
+                      class="badge tag"
+                      >Evonode</a
+                    >
+                    <a
+                      href="https://node.trittium.cc/"
+                      target="_blank"
+                      class="badge tag"
+                      >Trittium</a
+                    >
+                    <a
+                      href="https://midas.investments/shares"
+                      target="_blank"
+                      class="badge tag"
+                      >Midas Investments</a
+                    >
+                    <a
+                      href="https://nodehub.io/dashboard/view_coin?coin=scrypta"
+                      target="_blank"
+                      class="badge tag"
+                      >Node Hub</a
+                    >
                   </div>
                 </div>
               </div>
@@ -723,7 +598,8 @@
             <div class="row">
               <div class="col-12 col-md-6 p-3 text-center text-lg-left">
                 <p>
-                  Scrypta Twitter Bot is an open source project running on Scrypta Blockchain.
+                  Scrypta Twitter Bot is an open source project running on
+                  Scrypta Blockchain.
                 </p>
                 <!--
                                 Suggestion: Replace the text above with a description of your website.
@@ -732,7 +608,9 @@
               <div class="col-12 col-md-6 p-3 text-center text-lg-right">
                 <p>
                   © 2021 Powered by
-                  <a href="https://scrypta.foundation" target="_blank">Scrypta Foundation</a>.
+                  <a href="https://scrypta.foundation" target="_blank"
+                    >Scrypta Foundation</a
+                  >.
                 </p>
               </div>
             </div>
