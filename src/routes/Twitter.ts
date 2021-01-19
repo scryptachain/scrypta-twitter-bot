@@ -580,63 +580,65 @@ export async function endorse(tag, twitter_user, coin, amount) {
                     var user_mention = mentions[index].user.screen_name
                     var user_id = mentions[index].user.id
                     var user_mention_followers = mentions[index].user.followers_count
-                    if (user_mention_followers >= process.env.MIN_FOLLOWERS) {
-                        var mention_id = mentions[index]['id_str']
-                        var tipped = await db.find('mentions', { mention_id: mention_id, user_id: user_id })
-                        if (tipped === null && user_mention !== process.env.TWITTER_USERNAME && user_mention !== process.env.TWITTER_BOT && user_mention !== twitter_user.screen_name) {
-                            var user_registration = new Date(mentions[index].user.created_at)
-                            var now = new Date();
-                            var diff = now.getTime() - user_registration.getTime();
-                            var elapsed = diff / (1000 * 60 * 60 * 24)
-                            if (elapsed > parseInt(process.env.MIN_DAYS)) {
+                    if (user_mention !== process.env.TWITTER_BOT) {
+                        if (user_mention_followers >= process.env.MIN_FOLLOWERS) {
+                            var mention_id = mentions[index]['id_str']
+                            var tipped = await db.find('mentions', { mention_id: mention_id, user_id: user_id })
+                            if (tipped === null && user_mention !== process.env.TWITTER_USERNAME && user_mention !== process.env.TWITTER_BOT && user_mention !== twitter_user.screen_name) {
+                                var user_registration = new Date(mentions[index].user.created_at)
+                                var now = new Date();
+                                var diff = now.getTime() - user_registration.getTime();
+                                var elapsed = diff / (1000 * 60 * 60 * 24)
+                                if (elapsed > parseInt(process.env.MIN_DAYS)) {
 
-                                const scrypta = new ScryptaCore
-                                scrypta.staticnodes = true
-                                console.log('CHECKING USER BALANCE')
-                                let balance = await scrypta.get('/balance/' + twitter_user.address)
-                                if (balance.balance >= amount) {
-                                    let totip_user = await db.find('followers', { screen_name: user_mention })
-                                    if (totip_user === null) {
-                                        console.log('CREATING NEW TIPPED USER @' + user_mention + '!')
-                                        let twitter_user = await Twitter.get('users/show', { screen_name: user_mention })
-                                        var ck = CoinKey.createRandom(coinInfo)
-                                        twitter_user.data.address = ck.publicAddress
-                                        twitter_user.data.prv = ck.privateWif
-                                        await db.insert('followers', twitter_user.data)
-                                        totip_user = await db.find('followers', { screen_name: user_mention })
-                                    }
-                                    if (totip_user !== null) {
-                                        if (testmode === false) {
-                                            try {
-                                                scrypta.debug = true
-                                                let temp = await scrypta.importPrivateKey(twitter_user.prv, '-', false)
-                                                let sent = await scrypta.send(temp.walletstore, '-', totip_user.address, amount)
-                                                if (sent !== false && sent !== null && sent.length === 64) {
-                                                    await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: 'LYRA', channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
-                                                    await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $LYRA to @' + totip_user.screen_name + ' because endorsed ' + tag + ' Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
-                                                    await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
-                                                    newmentions++
-                                                    console.log("ENDORSEMENT TIP SENT!")
-                                                } else {
-                                                    console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                    const scrypta = new ScryptaCore
+                                    scrypta.staticnodes = true
+                                    console.log('CHECKING USER BALANCE')
+                                    let balance = await scrypta.get('/balance/' + twitter_user.address)
+                                    if (balance.balance >= amount) {
+                                        let totip_user = await db.find('followers', { screen_name: user_mention })
+                                        if (totip_user === null) {
+                                            console.log('CREATING NEW TIPPED USER @' + user_mention + '!')
+                                            let twitter_user = await Twitter.get('users/show', { screen_name: user_mention })
+                                            var ck = CoinKey.createRandom(coinInfo)
+                                            twitter_user.data.address = ck.publicAddress
+                                            twitter_user.data.prv = ck.privateWif
+                                            await db.insert('followers', twitter_user.data)
+                                            totip_user = await db.find('followers', { screen_name: user_mention })
+                                        }
+                                        if (totip_user !== null) {
+                                            if (testmode === false) {
+                                                try {
+                                                    scrypta.debug = true
+                                                    let temp = await scrypta.importPrivateKey(twitter_user.prv, '-', false)
+                                                    let sent = await scrypta.send(temp.walletstore, '-', totip_user.address, amount)
+                                                    if (sent !== false && sent !== null && sent.length === 64) {
+                                                        await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: 'LYRA', channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
+                                                        await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $LYRA to @' + totip_user.screen_name + ' because endorsed ' + tag + ' Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
+                                                        await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                                                        newmentions++
+                                                        console.log("ENDORSEMENT TIP SENT!")
+                                                    } else {
+                                                        console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                                    }
+                                                } catch (e) {
+                                                    console.log(e)
+                                                    console.log("SENDING ERROR, WILL RETRY LATER")
                                                 }
-                                            } catch (e) {
-                                                console.log(e)
-                                                console.log("SENDING ERROR, WILL RETRY LATER")
+                                            } else {
+                                                console.log("ENDORSEMENT TIP SENT!")
+                                                await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                                                newmentions++
                                             }
-                                        } else {
-                                            console.log("ENDORSEMENT TIP SENT!")
-                                            await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
-                                            newmentions++
                                         }
                                     }
+                                } else {
+                                    console.log('USER ' + user_mention + ' IS TOO YOUNG.')
                                 }
-                            } else {
-                                console.log('USER ' + user_mention + ' IS TOO YOUNG.')
                             }
+                        } else {
+                            console.log('USER ' + user_mention + ' DON\'T HAVE THE REQUIRED FOLLOWERS (' + user_mention_followers + ')')
                         }
-                    } else {
-                        console.log('USER ' + user_mention + ' DON\'T HAVE THE REQUIRED FOLLOWERS (' + user_mention_followers + ')')
                     }
                 }
                 console.log('FOUND ' + newmentions + ' NEW ENDORSEMENT MENSIONS')

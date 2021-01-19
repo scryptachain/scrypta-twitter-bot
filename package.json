@@ -1,6 +1,6 @@
 {
   "name": "scrypta-faucet",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Scrypta faucet linked to Twitter",
   "main": "index.js",
   "scripts": {
