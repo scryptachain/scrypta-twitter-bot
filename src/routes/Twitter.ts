@@ -253,6 +253,8 @@ export async function commands() {
                                             let amount = parseFloat(exploded[3])
                                             if (amount > 0) {
                                                 const scrypta = new ScryptaCore
+                                                scrypta.staticnodes = true
+                                                scrypta.debug = true
                                                 let balance = await scrypta.get('/balance/' + sender_user.address)
                                                 if (balance.balance >= amount) {
                                                     try {
@@ -277,6 +279,58 @@ export async function commands() {
                                         }
                                     } else {
                                         console.log('USER IS NOT REGISTERED TO SERVICE.')
+                                    }
+                                }
+                            }
+                        }
+                    } else if (text.indexOf('endorse') !== -1) {
+                        let exploded = text.split(' ')
+                        for (let j in exploded) {
+                            console.log('--> CHECKING ' + exploded[j])
+                            if (exploded[j] === 'endorse') {
+                                console.log('---> ENDORSEMENT FOUND!')
+                                let ni = parseInt(j) + 1
+                                let nit = parseInt(j) + 2
+                                let nic = parseInt(j) + 3
+                                let endorsement = exploded[ni]
+                                let tip = exploded[nit]
+                                let coin = exploded[nic]
+                                if (endorsement !== undefined && endorsement !== null && tip !== undefined && coin !== null && coin !== undefined && tip !== null && parseFloat(tip) > 0) {
+                                    var check = await db.find('followers', { id: twitter_user.id })
+                                    if (check == null) {
+                                        var ck = CoinKey.createRandom(coinInfo)
+                                        twitter_user.address = ck.publicAddress
+                                        twitter_user.prv = ck.privateWif
+                                        twitter_user.endorse = []
+                                        await db.insert('followers', twitter_user)
+                                        check = await db.find('followers', { id: twitter_user.id })
+                                    }
+
+                                    let endorse = []
+                                    let found = false
+
+                                    if (check.endorse !== undefined) {
+                                        endorse = check.endorse
+                                    }
+
+                                    for (let k in endorse) {
+                                        if (endorse[k].searcher === endorsement) {
+                                            found = true
+                                        }
+                                    }
+
+                                    if (!found) {
+                                        endorse.push({
+                                            searcher: endorsement,
+                                            coin: coin,
+                                            tip: tip
+                                        })
+
+                                        await db.update('followers', { id: twitter_user.id }, { $set: { endorse: endorse } })
+                                        await message(
+                                            twitter_user.id_str,
+                                            "Compliments, you're now endorsing " + endorsement + ". Each user that tweets your endorsement will receive  " + parseFloat(tip) + " $LYRA from you! Please be sure your address is always filled with some LYRA, check the balance here: https://bb.scryptachain/address/" + twitter_user.address
+                                        )
                                     }
                                 }
                             }
@@ -370,7 +424,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
             var address = user.address
             var pubAddr = ''
 
-            if(user.reward_address === undefined){
+            if (user.reward_address === undefined) {
                 if (address !== undefined) {
                     //SEND TO ADDRESS
                     pubAddr = address
@@ -381,7 +435,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
                     await db.update('followers', { id: twitter_user.id }, { $set: { address: pubAddr, prv: ck.privateWif } })
                     address = pubAddr
                 }
-            }else{
+            } else {
                 pubAddr = user.reward_address
             }
 
@@ -429,6 +483,93 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
     })
 }
 
+export async function endorse(tag, twitter_user, coin, amount) {
+    return new Promise(async response => {
+        const db = new Database.Mongo
+        console.log('LOOKING FOR TAG: ' + tag)
+        Twitter.get('search/tweets', { q: tag }, async function (err, data) {
+            if (!err) {
+                var found = data.statuses
+                var mentions = []
+                for (var index in found) {
+                    if (found[index].user !== twitter_user.screen_name) {
+                        mentions.push(found[index])
+                    }
+                }
+                var newmentions = 0
+                for (var index in mentions) {
+                    // console.log('\x1b[42m%s\x1b[0m', mentions[index].text,  mentions[index].user.screen_name)
+                    var user_mention = mentions[index].user.screen_name
+                    var user_id = mentions[index].user.id
+                    var user_mention_followers = mentions[index].user.followers_count
+                    if (user_mention_followers >= process.env.MIN_FOLLOWERS) {
+                        var mention_id = mentions[index]['id_str']
+                        var tipped = await db.find('mentions', { mention_id: mention_id, user_id: user_id })
+                        if (tipped === null && user_mention !== process.env.TWITTER_USERNAME && user_mention !== process.env.TWITTER_BOT && user_mention !== twitter_user.screen_name) {
+                            var user_registration = new Date(mentions[index].user.created_at)
+                            var now = new Date();
+                            var diff = now.getTime() - user_registration.getTime();
+                            var elapsed = diff / (1000 * 60 * 60 * 24)
+                            if (elapsed > parseInt(process.env.MIN_DAYS)) {
+
+                                const scrypta = new ScryptaCore
+                                scrypta.staticnodes = true
+                                console.log('CHECKING USER BALANCE')
+                                let balance = await scrypta.get('/balance/' + twitter_user.address)
+                                if (balance.balance >= amount) {
+                                    let totip_user = await db.find('followers', { screen_name: user_mention })
+                                    if (totip_user === null) {
+                                        console.log('CREATING NEW TIPPED USER @' + user_mention + '!')
+                                        let twitter_user = await Twitter.get('users/show', { screen_name: user_mention })
+                                        var ck = CoinKey.createRandom(coinInfo)
+                                        twitter_user.data.address = ck.publicAddress
+                                        twitter_user.data.prv = ck.privateWif
+                                        await db.insert('followers', twitter_user.data)
+                                        totip_user = await db.find('followers', { screen_name: user_mention })
+                                    }
+                                    if (totip_user !== null) {
+                                        if (testmode === false) {
+                                            try {
+                                                let temp = await scrypta.importPrivateKey(twitter_user.prv, '-', false)
+                                                let sent = await scrypta.send(temp.walletstore, '-', totip_user.address, amount)
+                                                if (sent !== false && sent !== null && sent.length === 64) {
+                                                    await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: 'LYRA', channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
+                                                    await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $LYRA to @' + totip_user.screen_name + ' because endorsed ' + tag + ' Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
+                                                    await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                                                    newmentions++
+                                                    console.log("ENDORSEMENT TIP SENT!")
+                                                } else {
+                                                    console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                                }
+                                            } catch (e) {
+                                                console.log(e)
+                                                console.log("SENDING ERROR, WILL RETRY LATER")
+                                            }
+                                        } else {
+                                            console.log("ENDORSEMENT TIP SENT!")
+                                            await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                                            newmentions++
+                                        }
+                                    }
+                                }
+                            } else {
+                                console.log('USER ' + user_mention + ' IS TOO YOUNG.')
+                            }
+                        }
+                    } else {
+                        console.log('USER ' + user_mention + ' DON\'T HAVE THE REQUIRED FOLLOWERS (' + user_mention_followers + ')')
+                    }
+                }
+                console.log('FOUND ' + newmentions + ' NEW ENDORSEMENT MENSIONS')
+                response(true)
+            } else {
+                console.log('ERROR WHILE GETTING USER MENTIONS!', err.message)
+                response(false)
+            }
+        })
+    })
+};
+
 export async function message(twitter_user, message) {
     return new Promise(async response => {
         console.log('SENDING MESSAGE TO ' + twitter_user)
@@ -453,7 +594,7 @@ export async function message(twitter_user, message) {
 
 export async function post(message) {
     return new Promise(async response => {
-        console.log('POSTING MESSAGE TO TWITTER')
+        console.log('POSTING MESSAGE TO TWITTER', message)
         const db = new Database.Mongo
         if (testmode === false) {
             try {

@@ -17,7 +17,6 @@ export function rendervue(req: express.Request, res: express.res) {
 export function returnLastTips(req: express.Request, res: express.res) {
     const db = new Database.Mongo
     db.find('tips', {}, {timestamp: -1}).then(tips => {
-        console.log(tips)
         res.send(tips)
     })
 };
