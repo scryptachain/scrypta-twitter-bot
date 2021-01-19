@@ -90,7 +90,7 @@ export function getAccessToken(req: express.Request, res: express.res) {
                         }
                         let storage = {
                             name: userDB.name,
-                            screen_name: userDB.name,
+                            screen_name: userDB.screen_name,
                             reward_address: userDB.reward_address,
                             prv: userDB.prv,
                             address: userDB.address,
