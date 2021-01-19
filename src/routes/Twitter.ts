@@ -277,7 +277,7 @@ export async function commands() {
                                                             console.log(e)
                                                             console.log("SENDING ERROR, WILL RETRY LATER")
                                                         }
-                                                    }else{
+                                                    } else {
                                                         console.log("NOT ENOUGH BALANCE, IGNORING MESSAGE.")
                                                         await db.insert('actions', { id: data.statuses[index]['id_str'] })
                                                     }
@@ -460,7 +460,7 @@ export async function commands() {
                                                 console.log('AMOUNT IS NOT VALID ' + amount)
                                             }
                                         } else {
-                                                    console.log('STORING IN DB, TESTMODE IS ON')
+                                            console.log('STORING IN DB, TESTMODE IS ON')
                                             await db.insert('actions', { id: data.statuses[index]['id_str'] })
                                         }
                                     } else {
