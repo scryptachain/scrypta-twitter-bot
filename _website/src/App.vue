@@ -18,24 +18,15 @@
                       <img
                         class="image-twitter"
                         :src="user.image"
-                        alt="Twitter Bot Account"
                       />
                     </div>
                     <div class="col-10">
                       <h2 class="mb-0 super effect-static-text">
                         @{{ user.screen_name }}
                       </h2>
-                      <h5 style="margin-top: -10px">{{ user.name }}</h5>
+                      <h5 style="margin-top: -10px">{{ user.name }} - <a href="#" v-on:click="exit">LOGOUT</a></h5>
                     </div>
                   </div>
-                  <p>
-                    Welcome! This is your Scrypta Twitter Bot account, here you
-                    can see some informations about it, likes your Scrypta
-                    reward address and private key.
-                  </p>
-                  <h6 style="color: #1e50bc">
-                    $LYRA #scrypta #scryptachain @scryptachain
-                  </h6>
                 </div>
               </div>
               <div class="row items">
@@ -45,9 +36,9 @@
                       <i class="icon fas fa-chart-line"></i>
                     </div>
                     <div class="col-12 col-md-9 align-self-center">
-                      <h4>My Balance</h4>
+                      <h6>My Balance</h6>
                       <div class="d-inline-flex justify-content-center">
-                        <p>{{ user.address }}</p>
+                        <p>{{ balance }} $LYRA</p>
                       </div>
                     </div>
                   </div>
@@ -56,7 +47,7 @@
                       <i class="icon fab fa-twitter"></i>
                     </div>
                     <div class="col-12 col-md-9 align-self-center">
-                      <h4>Account address</h4>
+                      <h6>Account address</h6>
                       <div class="d-inline-flex justify-content-center">
                         <p>{{ user.address }}</p>
                         <div style="margin-left: 20px; margin-top: -5px">
@@ -75,7 +66,7 @@
                       <i class="icon fas fa-user"></i>
                     </div>
                     <div class="col-12 col-md-9 align-self-center">
-                      <h4>Reward address</h4>
+                      <h6>Reward address</h6>
                       <div class="d-inline-flex justify-content-center">
                         <p>{{ user.reward_address }}</p>
                         <div style="margin-left: 20px; margin-top: -5px">
@@ -94,9 +85,9 @@
                       <i class="icon fas fa-key"></i>
                     </div>
                     <div class="col-12 col-md-9 align-self-center">
-                      <h4>Private Key</h4>
+                      <h6>Private Key</h6>
                       <div class="d-inline-flex justify-content-center">
-                        <p>{{ user.prv }}</p>
+                        <p>{{ user.prv.substr(0,10) }}...{{ user.prv.substr(-10) }}</p>
                         <div style="margin-left: 20px; margin-top: -5px">
                           <div
                             class="smooth-anchor ml-auto mr-auto ml-md-0 btn dark-button"
@@ -113,7 +104,7 @@
                 </div>
               </div>
             </div>
-            <div class="gallery col-12 col-md-6">
+            <div class="col-12 col-md-6 hidden-xs">
               <img
                 style="margin-top: 30%"
                 src="assets/images/twitter_2.png"
@@ -129,8 +120,6 @@
       <header id="header">
         <!-- Navbar -->
         <nav
-          data-aos="zoom-out"
-          data-aos-delay="800"
           class="navbar navbar-expand"
         >
           <div class="container header">
@@ -144,9 +133,6 @@
 
             <!-- Navbar Items -->
             <ul class="navbar-nav items">
-              <li class="nav-item">
-                <a href="#header" class="nav-link smooth-anchor">Home</a>
-              </li>
               <li class="nav-item">
                 <a href="#about" class="nav-link smooth-anchor">About</a>
               </li>
@@ -190,7 +176,7 @@
                 ></a>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link"
+                <a href="https://scrypta.wiki" target="_blank" class="nav-link"
                   ><i class="fab fa-wikipedia-w"></i
                 ></a>
               </li>
@@ -228,8 +214,6 @@
             <!-- Item 1 -->
             <div class="swiper-slide slide-center">
               <img
-                data-aos="zoom-out-up"
-                data-aos-delay="800"
                 src="assets/images/twitter_bot.png"
                 class="hero-image"
                 alt="Twitter Bot"
@@ -238,27 +222,19 @@
                 <div class="col-12 d-flex inner">
                   <div class="left align-self-center text-center text-md-left">
                     <h1
-                      data-aos="zoom-out-up"
-                      data-aos-delay="400"
                       class="title effect-static-text"
                     >
                       Scrypta Twitter Bot
                     </h1>
                     <p
-                      data-aos="zoom-out-up"
-                      data-aos-delay="800"
                       class="description"
                     >
-                      Welcome to Scrypta Faucet.<br />
-                      Here will be cloudy days! But don't worry, only LYRA will
-                      rain!
+                      Here will be rainy days!<br>
+                      Don't worry, only $LYRA will rain!
                     </p>
                     <a
                       href="/twitter/login"
-                      data-aos="zoom-out-up"
-                      data-aos-delay="1200"
-                      class="smooth-anchor ml-auto mr-auto ml-md-0 mt-4 btn dark-button"
-                      ><i class="icon-cup"></i>LOGIN</a
+                      ><h2>LOGIN</h2></a
                     >
                   </div>
                 </div>
@@ -276,8 +252,6 @@
             <!-- Item 1 -->
             <div class="swiper-slide slide-center">
               <img
-                data-aos="zoom-out-up"
-                data-aos-delay="800"
                 src="/assets/images/twitter_1.png"
                 class="hero-image-left"
                 alt="Hero Image"
@@ -287,34 +261,21 @@
                 <div class="col-12 d-flex justify-content-end inner">
                   <div class="right text-center text-md-right">
                     <h2
-                      data-aos="zoom-out-up"
-                      data-aos-delay="400"
                       class="title effect-static-text"
                     >
-                      Learn to<br />Play Now.
+                      Interact<br />now!
                     </h2>
                     <p
-                      data-aos="zoom-out-up"
-                      data-aos-delay="800"
                       class="description ml-auto"
                     >
-                      Twitter Bot is running! follow us on twitter, put like,
+                      Bot is running! Follow us on Twitter, put likes,
                       comment, quote @scryptachain and retweet and you will
                       automatically receive LYRA.
                     </p>
                     <h5 style="color: #1e50bc">
-                      It is simple! Interact with our Twitter Post <br />
+                      You can also make posts containing:<br />
                       $LYRA #scrypta #scryptachain and @scryptachain
                     </h5>
-                    <div class="d-sm-inline-flex mt-3">
-                      <a
-                        href="#contact"
-                        data-aos="zoom-out-up"
-                        data-aos-delay="1200"
-                        class="smooth-anchor ml-auto mr-auto mr-md-0 mt-4 mt-sm-0 btn dark-button"
-                        ><i class="icon-cup"></i>GET STARTED</a
-                      >
-                    </div>
                   </div>
                 </div>
               </div>
@@ -330,20 +291,18 @@
           <div class="row text-center intro">
             <div class="col-12">
               <h2
-                data-aos="zoom-out-up"
-                data-aos-delay="400"
                 class="title effect-static-text"
               >
-                Let's Start
+                How it works
               </h2>
-              <p class="text-max-800">Follow this few step e start to play!</p>
+              <p class="text-max-800">Follow these few steps and start earning $LYRA!</p>
             </div>
           </div>
           <div class="row justify-content-center text-center items">
             <div class="col-12 col-md-6 col-lg-6 item">
               <div class="card featured">
                 <h2 class="icon">1.</h2>
-                <h4>Follow Scrypta</h4>
+                <h6>Follow Scrypta</h6>
                 <br />
                 <p>
                   The first step you have to do is follow our Twitter official
@@ -359,12 +318,12 @@
             <div class="col-12 col-md-6 col-lg-6 item">
               <div class="card">
                 <h2 class="icon">2.</h2>
-                <h4>Sync</h4>
+                <h6>Sync</h6>
                 <p>
                   Sync your twitter account with the bot! Just
                   <a
                     style="font-weight: 600"
-                    href="https://twitter.com/scryptachain"
+                    href="/twitter/login"
                     target="_blank"
                     >CLICK HERE</a
                   >
@@ -378,12 +337,12 @@
             <div class="col-12 col-md-6 col-lg-6 item">
               <div class="card">
                 <h2 class="icon">3.</h2>
-                <h4>
+                <h6>
                   Import on Wallet <br />
                   <span style="font-size: 12px; font-weight: 400"
                     >(Optional but reccomended)</span
                   >
-                </h4>
+                </h6>
                 <br />
                 <p>
                   Import your private key in your Manent Extension (download for
@@ -405,15 +364,15 @@
             <div class="col-12 col-md-6 col-lg-6 item">
               <div class="card featured">
                 <h2 class="icon">4.</h2>
-                <h4>Make interactions</h4>
+                <h6>Make interactions</h6>
                 <p>
                   Now you're able to interact with our twitter profile and
                   receive rewards! You can comment, retweet, quote
                   <a href="https://twitter.com/scryptachain" target="_blank">
                     @scryptachain</a
                   >
-                  and you'll receive
-                  <span style="color: white; font-weight: 600">1 LYRA</span>.
+                  and you'll receive up to
+                  <span style="color: white; font-weight: 600">3 LYRA</span>.
                   <br /><br />
                   <span style="color: #1e50bc; font-weight: 600"
                     >$LYRA #scrypta #scryptachain and @scryptachain</span
@@ -433,15 +392,12 @@
               <div class="row intro">
                 <div class="col-12 p-0">
                   <h2
-                    data-aos="zoom-out-up"
-                    data-aos-delay="400"
                     class="title effect-static-text"
                   >
                     Other Functions
                   </h2>
                   <p style="color: #f5f5f5">
-                    Explore other functions of Scrypta Twitter Bot. You can
-                    personalize your account and tips your friends!
+                    Explore other functions of Scrypta Twitter Bot. You can interact with it using following commands:
                   </p>
                 </div>
               </div>
@@ -455,19 +411,15 @@
                       <h3 style="color: #1e50bc">
                         Endorse an @user or an #hashtag
                       </h3>
-                      <p>
-                        Become an endorser! You can give rewards to your
+                      <p>Become an endorser! You can give rewards to your
                         followers with your Lyra for each interaction with your
                         twitter profile or for your favourite #hashtags.
-                        <br /><br />
-                        Share a post on twitter using either or both of these
+                        <br /><br />Share a post on twitter using either or both of these
                         commands to start raising awareness of your profile!
                       </p>
-                      <h5 style="color: #84a5eb">
-                        #scryptabot endorse @user 1 LYRA
+                      <h5 style="color: #84a5eb">#scryptabot endorse @user 1 LYRA
                       </h5>
-                      <h5 style="color: #84a5eb">
-                        #scryptabot endorse #bitcoin 1 LYRA
+                      <h5 style="color: #84a5eb">#scryptabot endorse #bitcoin 1 LYRA
                       </h5>
                     </div>
                   </div>
@@ -477,12 +429,10 @@
                     </div>
                     <div class="col-12 col-md-9 align-self-center">
                       <h3 style="color: #1e50bc">Set your own address</h3>
-                      <p>
-                        Write a simple post with your twitter account to change
+                      <p>Write a simple post with your twitter account to change
                         the address for receive rewards.
                       </p>
-                      <h5 style="color: #84a5eb">
-                        #scryptabot address YourLyraAddress
+                      <h5 style="color: #84a5eb">#scryptabot address YourLyraAddress
                       </h5>
                     </div>
                   </div>
@@ -492,8 +442,7 @@
                     </div>
                     <div class="col-12 col-md-9 align-self-center">
                       <h3 style="color: #1e50bc">Send a tip</h3>
-                      <p>
-                        Do you want send a tip at another user? You have just
+                      <p>Do you want to send a tip at another user? You have just
                         write a post, tag your friend and enter an amount!
                       </p>
                       <h5 style="color: #84a5eb">#scryptabot tip @user 1</h5>
@@ -505,12 +454,10 @@
                     </div>
                     <div class="col-12 col-md-9 align-self-center">
                       <h3 style="color: #1e50bc">Withdraw</h3>
-                      <p>
-                        Do you want send a tip at another user? You have just
-                        write a post, tag your friend and enter an amount!
+                      <p>Do you want to withdraw to your local address? You have just
+                        write a post like this: 
                       </p>
-                      <h5 style="color: #84a5eb">
-                        #scryptabot withdraw YourLyraAddress amount
+                      <h5 style="color: #84a5eb">#scryptabot withdraw YourLyraAddress amount
                       </h5>
                     </div>
                   </div>
@@ -531,11 +478,9 @@
           <div class="row text-center intro">
             <div class="col-12">
               <h2
-                data-aos="zoom-out-up"
-                data-aos-delay="400"
                 class="title effect-static-text"
               >
-                Some Rules
+                Just few rules
               </h2>
               <p class="text-max-800">
                 In order to receive rewards in Lyra for interactions with our
@@ -546,39 +491,31 @@
           </div>
           <div
             data-aos-id="counter"
-            data-aos="fade-up"
-            data-aos-delay="200"
             class="row justify-content-center text-center items"
           >
             <div class="col-12 col-md-6 col-lg-2 item">
               <div data-percent="60" class="radial">
                 <span></span>
               </div>
-              <h4>Account since 60 days</h4>
+              <h6>Account age in days</h6>
             </div>
             <div class="col-12 col-md-6 col-lg-2 item">
               <div data-percent="360" class="radial">
                 <span></span>
               </div>
-              <h4>Minutes per interaction</h4>
+              <h6>Minutes per interaction</h6>
             </div>
             <div class="col-12 col-md-6 col-lg-2 item">
               <div data-percent="75" class="radial">
                 <span></span>
               </div>
-              <h4>Minimum followers</h4>
+              <h6>Minimum followers</h6>
             </div>
             <div class="col-12 col-md-6 col-lg-2 item">
-              <div data-percent="3" class="radial">
+              <div data-percent="4" class="radial">
                 <span></span>
               </div>
-              <h4>LYRA per first reaction</h4>
-            </div>
-            <div class="col-12 col-md-6 col-lg-2 item">
-              <div data-percent="0.5" class="radial">
-                <span></span>
-              </div>
-              <h4>LYRA per reaction</h4>
+              <h6>Max $LYRA each day</h6>
             </div>
           </div>
         </div>
@@ -601,9 +538,7 @@
                       </a>
                     </div>
                     <p>
-                      Scrypta Blockchain is a digital <br />
-                      infrastructure decentralized <br />
-                      and permissionless.
+                      Scrypta Twitter Bot is an open-source project by Scrypta Foundation
                     </p>
                     <ul class="navbar-nav social share-list mt-0 ml-auto">
                       <li class="nav-item">
@@ -651,8 +586,14 @@
                 <div class="row">
                   <div
                     class="col-12 col-lg-4 p-3 text-center text-lg-left item"
+                  ></div>
+                  <div
+                    class="col-12 col-lg-4 p-3 text-center text-lg-left item"
+                  ></div>
+                  <div
+                    class="col-12 col-lg-4 p-3 text-center text-lg-right item"
                   >
-                    <h4 class="title">Official Websites</h4>
+                    <h6 class="title">Official Websites</h6>
                     <ul class="navbar-nav">
                       <li class="nav-item">
                         <a
@@ -674,95 +615,23 @@
                       </li>
                       <li class="nav-item">
                         <a
-                          href="https://explorer.scryptachain.org/"
+                          href="http://scryptaconsortium.org/"
+                          target="_blank"
+                          class="nav-link"
+                        >
+                          Scrypta Consortium
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a
+                          href="https://bb.scryptachain.org/"
                           target="_blank"
                           class="nav-link"
                         >
                           Block Explorer
                         </a>
                       </li>
-                      <li class="nav-item">
-                        <a
-                          href="https://scryptachain.org/"
-                          class="mt-4 mr-auto ml-auto ml-lg-0 btn dark-button smooth-anchor"
-                          ><i class="fas fa-globe"></i>MORE INFO</a
-                        >
-                      </li>
                     </ul>
-                  </div>
-                  <div
-                    class="col-12 col-lg-4 p-3 text-center text-lg-left item"
-                  >
-                    <h4 class="title">Exchanges</h4>
-                    <ul class="navbar-nav">
-                      <li class="nav-item">
-                        <a
-                          href="https://whitebit.com/trade/LYRA_EUR"
-                          target="_blank"
-                          class="nav-link"
-                          >WhiteBit</a
-                        >
-                      </li>
-                      <li class="nav-item">
-                        <a
-                          href="http://mercatox.com/exchange/LYRA/BTC"
-                          target="_blank"
-                          class="nav-link"
-                          >Mercatox</a
-                        >
-                      </li>
-                      <li class="nav-item">
-                        <a
-                          href="https://graviex.net/markets/lyrabtc"
-                          target="_blank"
-                          class="nav-link"
-                          >Graviex</a
-                        >
-                      </li>
-                      <li class="nav-item">
-                        <a
-                          href="https://midas.investments/exchange/LYRA/BTC"
-                          target="_blank"
-                          class="nav-link"
-                          >Midas</a
-                        >
-                      </li>
-                    </ul>
-                  </div>
-                  <div
-                    class="col-12 col-lg-4 p-2 text-center text-lg-left item"
-                  >
-                    <h4 class="title">Masternodes & Staking Platforms</h4>
-                    <a
-                      href="https://thehub.host/"
-                      target="_blank"
-                      class="badge tag"
-                      >The Hub</a
-                    >
-                    <a
-                      href="https://evonodes.com/pool/LYRA"
-                      target="_blank"
-                      class="badge tag"
-                      >Evonode</a
-                    >
-                    <a
-                      href="https://node.trittium.cc/"
-                      target="_blank"
-                      class="badge tag"
-                      >Trittium</a
-                    >
-                    <a
-                      href="https://midas.investments/shares"
-                      target="_blank"
-                      class="badge tag"
-                      >Midas Investments</a
-                    >
-                    <a
-                      href="https://nodehub.io/dashboard/view_coin?coin=scrypta"
-                      target="_blank"
-                      class="badge tag"
-                      >Node Hub</a
-                    >
                   </div>
                 </div>
               </div>
@@ -836,6 +705,7 @@
 </template>
 
 <script>
+const ScryptaCore = require('@scrypta/core')
 export default {
   name: "App",
 
@@ -844,22 +714,28 @@ export default {
       isLogged: false,
       user: {},
       message: "Copy these Text",
+      balance: 0,
+      scrypta: new ScryptaCore(true)
     };
   },
   methods: {
     onCopy: function (e) {
       alert("You just copied: " + e.text);
     },
+    exit(){
+      localStorage.setItem('user', null)
+      location.reload()
+    }
   },
-
-  mounted() {
+  async mounted() {
     const app = this;
     if (localStorage.getItem("user") !== null) {
       app.isLogged = true;
       app.user = JSON.parse(localStorage.getItem("user"));
+      let b = await app.scrypta.get('/balance/' + app.user.address)
+      app.balance = b.balance
     }
   },
-
   components: {},
 };
 </script>
@@ -873,7 +749,9 @@ export default {
   color: #2c3e50;
   margin-top: 0px;
 }
-
+@media screen and (max-width: 768px){
+  .hidden-xs{display: none!important;}
+}
 :root {
   --header-bg-color: #16161c;
   --nav-item-color: #f5f5f5;
@@ -887,5 +765,11 @@ export default {
   --section-4-bg-color: #111117;
 
   --footer-bg-color: #16161c;
+}
+.align-self-center{
+  padding:0;
+}
+.highlights .items .item{
+  margin-bottom:0px!important;
 }
 </style>
