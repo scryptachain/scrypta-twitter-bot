@@ -530,6 +530,7 @@ export async function endorse(tag, twitter_user, coin, amount) {
                                     if (totip_user !== null) {
                                         if (testmode === false) {
                                             try {
+                                                scrypta.debug = true
                                                 let temp = await scrypta.importPrivateKey(twitter_user.prv, '-', false)
                                                 let sent = await scrypta.send(temp.walletstore, '-', totip_user.address, amount)
                                                 if (sent !== false && sent !== null && sent.length === 64) {
