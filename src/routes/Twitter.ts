@@ -345,7 +345,7 @@ export async function commands() {
                                             await db.update('followers', { id: twitter_user.id }, { $set: { endorse: update } })
                                             await message(
                                                 twitter_user.id_str,
-                                                "Oh no, you're now stopped endorsing " + endorsement + ".."
+                                                "Yeah!, you're now endorsing " + endorsement + " again!"
                                             )
 
                                         }
