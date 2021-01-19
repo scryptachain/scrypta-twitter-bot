@@ -81,20 +81,22 @@ export function getAccessToken(req: express.Request, res: express.res) {
                     } else {
                         const db = new Database.Mongo
                         let userDB = await db.find('followers', { id: user.id })
-                        if (userDB !== null && userDB.address !== undefined) {
-                            if (userDB.reward_address === undefined) {
-                                res.send("<div style='padding: 30px;'><h1>Well done!</h1>You're connected with the address <b>" + userDB.address + "</b><br>which have been created by us.<br><br>The private key is: " + userDB.prv + ".<br><br><span style='color:#f00'>You should change your address by tweeting: `#scryptabot address YourLyraAddress`</span><br><br>Don't forget to import your private key into Manent or Scrypta Core Wallet!</div>")
-                            } else {
-                                res.send("<div style='padding: 30px;'><h1>Well done!</h1>You're connected with the address <b>" + userDB.reward_address + "</b><br><br><span style='color:green'>You can continue use our provided address <b>" + userDB.address + "</b> to interact with other people on Twitter!<br>The private key of this <b>last</b> address is: " + userDB.prv + ".</span></div>")
-                            }
-                        } else {
+                        if (userDB === null) {
                             var ck = CoinKey.createRandom(coinInfo)
                             user.address = ck.publicAddress
                             user.prv = ck.privateWif
                             await db.insert('followers', user)
                             userDB = await db.find('followers', { id: user.id })
-                            res.send("<div style='padding: 30px;'><h1>Well done!</h1>You've been subscribed with the address <b>" + userDB.address + "</b><br>which have been created by us.<br><br>The private key is: " + userDB.prv + ".<br><br><span style='color:#f00'>You should change your address by tweeting: `#scryptabot address YourLyraAddress`</span><br><br>Don't forget to import your private key into Manent or Scrypta Core Wallet!</div>")
                         }
+                        let storage = {
+                            name: userDB.name,
+                            screen_name: userDB.name,
+                            reward_address: userDB.reward_address,
+                            prv: userDB.prv,
+                            address: userDB.address,
+                            image: userDB.profile_image_url_https
+                        }
+                        res.send('<html><script>localStorage.setItem(`user`,`' + JSON.stringify(storage) + '`);window.location=`/#/`;</script></html>')
                     }
                 }
             });
@@ -186,7 +188,7 @@ export async function tag(tag, twitter_user) {
                         }
                     }
                 }
-                console.log('FOUND ' + newmentions + ' NEW CASHTAGS MENSIONS')
+                console.log('FOUND ' + newmentions + ' NEW CASHTAGS MENTIONS')
                 response(true)
             } else {
                 console.log('ERROR WHILE GETTING USER MENTIONS!', err.message)
@@ -256,10 +258,11 @@ export async function commands() {
                                             if (amount > 0) {
                                                 const scrypta = new ScryptaCore
                                                 scrypta.staticnodes = true
-                                                scrypta.debug = true
+                                                console.log('CHECKING BALANCE OF ' + sender_user.address)
                                                 let balance = await scrypta.get('/balance/' + sender_user.address)
                                                 if (balance.balance >= amount) {
                                                     try {
+                                                        console.log('SENDING COINS FROM ' + sender_user.address + ' TO ' + totip_user.address)
                                                         let temp = await scrypta.importPrivateKey(sender_user.prv, '-', false)
                                                         let sent = await scrypta.send(temp.walletstore, '-', totip_user.address, amount)
                                                         if (sent !== false && sent !== null && sent.length === 64) {
@@ -347,7 +350,7 @@ export async function commands() {
                                             await db.update('followers', { id: twitter_user.id }, { $set: { endorse: update } })
                                             await message(
                                                 twitter_user.id_str,
-                                                "Yeah!, you're now endorsing " + endorsement + " again!"
+                                                "Yeah! You're now endorsing " + endorsement + " again!"
                                             )
 
                                         }
@@ -641,7 +644,7 @@ export async function endorse(tag, twitter_user, coin, amount) {
                         }
                     }
                 }
-                console.log('FOUND ' + newmentions + ' NEW ENDORSEMENT MENSIONS')
+                console.log('FOUND ' + newmentions + ' NEW ENDORSEMENT MENTIONS')
                 response(true)
             } else {
                 console.log('ERROR WHILE GETTING USER MENTIONS!', err.message)

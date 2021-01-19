@@ -20,7 +20,7 @@ class App {
 
     app.express.get('/', Interface.rendervue)
     app.express.get('/tips', Interface.returnLastTips)
-    app.express.get('/twitter/request-token', Twitter.getAuth)
+    app.express.get('/twitter/login', Twitter.getAuth)
     app.express.get('/twitter/callback', Twitter.getAccessToken)
 
     if (process.env.TWITTER_USERNAME !== undefined) {
