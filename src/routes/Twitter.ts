@@ -219,7 +219,7 @@ export async function commands() {
                                         twitter_user.id_str,
                                         "Compliments, you're now a Scrypta Ambassador! You will receive rewards for each interaction with us at address " + address + "!"
                                     )
-                                } else if (check.address !== address) {
+                                } else if (check.reward_address === undefined || (check.reward_address !== undefined && check.reward_address !== address)) {
                                     console.log('UPDATING USER ' + twitter_user.screen_name + ' WITH ADDRESS ' + address)
                                     await db.update('followers', { id: twitter_user.id }, { $set: { reward_address: address } })
                                     await message(
