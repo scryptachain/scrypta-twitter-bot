@@ -434,7 +434,7 @@ export async function commands() {
                                     if (sender_user !== null && sender_user.prv !== undefined) {
                                         if (testmode === false) {
                                             let amount = parseFloat(exploded[3])
-                                            let address = parseFloat(exploded[2])
+                                            let address = exploded[2]
                                             if (amount > 0) {
                                                 const scrypta = new ScryptaCore
                                                 scrypta.staticnodes = true
