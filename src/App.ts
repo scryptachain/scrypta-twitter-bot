@@ -63,7 +63,9 @@ class App {
             console.log('CHECKING ' + twitter_user.screen_name)
             for(let k in twitter_user.endorse){
               let endorse = twitter_user.endorse[k]
-              await Twitter.endorse(endorse.searcher, twitter_user, endorse.coin, endorse.tip)
+              if(endorse.ignore === undefined || endorse.ignore === false){
+                await Twitter.endorse(endorse.searcher, twitter_user, endorse.coin, endorse.tip)
+              }
             }
           }
         }

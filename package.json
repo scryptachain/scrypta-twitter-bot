@@ -4,7 +4,7 @@
   "description": "Scrypta faucet linked to Twitter",
   "main": "index.js",
   "scripts": {
-    "dev": "tsc --watch & nodemon dist",
+    "dev": "tsc --watch & nodemon --delay 3 dist",
     "test": "tsc && mocha dist/**/*.spec.js",
     "lint": "eslint src --ext ts",
     "tsc": "tsc",

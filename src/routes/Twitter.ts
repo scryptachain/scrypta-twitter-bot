@@ -206,8 +206,8 @@ export async function commands() {
                     let text = data.statuses[index].text
                     if (text.indexOf('address') !== -1) {
                         let exploded = text.split(' ')
+                        console.log('--> CHECKING ' + text)
                         for (let j in exploded) {
-                            console.log('--> CHECKING ' + exploded[j])
                             if (exploded[j].substr(0, 1) === 'L') {
                                 let address = exploded[j]
                                 var check = await db.find('followers', { id: twitter_user.id })
@@ -231,8 +231,8 @@ export async function commands() {
                         }
                     } else if (text.indexOf('tip') !== -1) {
                         let exploded = text.split(' ')
+                        console.log('--> CHECKING ' + text)
                         for (let j in exploded) {
-                            console.log('--> CHECKING ' + exploded[j])
                             if (exploded[j].substr(0, 1) === '@') {
                                 let check_tip = await db.find('tips', { id: data.statuses[index]['id_str'] })
                                 if (check_tip === null) {
@@ -283,54 +283,128 @@ export async function commands() {
                                 }
                             }
                         }
-                    } else if (text.indexOf('endorse') !== -1) {
+                    } else if (text.indexOf('disable') !== -1) {
                         let exploded = text.split(' ')
+                        console.log('--> CHECKING ' + text)
                         for (let j in exploded) {
-                            console.log('--> CHECKING ' + exploded[j])
-                            if (exploded[j] === 'endorse') {
-                                console.log('---> ENDORSEMENT FOUND!')
-                                let ni = parseInt(j) + 1
-                                let nit = parseInt(j) + 2
-                                let nic = parseInt(j) + 3
-                                let endorsement = exploded[ni]
-                                let tip = exploded[nit]
-                                let coin = exploded[nic]
-                                if (endorsement !== undefined && endorsement !== null && tip !== undefined && coin !== null && coin !== undefined && tip !== null && parseFloat(tip) > 0) {
-                                    var check = await db.find('followers', { id: twitter_user.id })
-                                    if (check == null) {
-                                        var ck = CoinKey.createRandom(coinInfo)
-                                        twitter_user.address = ck.publicAddress
-                                        twitter_user.prv = ck.privateWif
-                                        twitter_user.endorse = []
-                                        await db.insert('followers', twitter_user)
-                                        check = await db.find('followers', { id: twitter_user.id })
-                                    }
+                            if (exploded[j] === 'disable') {
+                                let check_action = await db.find('actions', { id: data.statuses[index]['id_str'] })
+                                if (check_action === null) {
+                                    await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                    console.log('---> REMOVING ENDORSEMENT FOUND!')
+                                    let ni = parseInt(j) + 1
+                                    let endorsement = exploded[ni]
+                                    if (endorsement !== undefined && endorsement !== null) {
+                                        var check = await db.find('followers', { id: twitter_user.id })
+                                        if (check !== null) {
+                                            let update = []
+                                            for (let k in check.endorse) {
+                                                if (check.endorse[k].searcher !== endorsement) {
+                                                    update.push(check.endorse[k])
+                                                } else {
+                                                    check.endorse[k].ignore = true
+                                                    update.push(check.endorse[k])
+                                                }
+                                            }
 
-                                    let endorse = []
-                                    let found = false
+                                            await db.update('followers', { id: twitter_user.id }, { $set: { endorse: update } })
+                                            await message(
+                                                twitter_user.id_str,
+                                                "Oh no, you're now stopped endorsing " + endorsement + ".."
+                                            )
 
-                                    if (check.endorse !== undefined) {
-                                        endorse = check.endorse
-                                    }
-
-                                    for (let k in endorse) {
-                                        if (endorse[k].searcher === endorsement) {
-                                            found = true
                                         }
                                     }
+                                }
+                            }
+                        }
+                    } else if (text.indexOf('enable') !== -1) {
+                        let exploded = text.split(' ')
+                        console.log('--> CHECKING ' + text)
+                        for (let j in exploded) {
+                            if (exploded[j] === 'enable') {
+                                let check_action = await db.find('actions', { id: data.statuses[index]['id_str'] })
+                                if (check_action === null) {
+                                    await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                    console.log('---> ENABLING ENDORSEMENT AGAIN!')
+                                    let ni = parseInt(j) + 1
+                                    let endorsement = exploded[ni]
+                                    if (endorsement !== undefined && endorsement !== null) {
+                                        var check = await db.find('followers', { id: twitter_user.id })
+                                        if (check !== null) {
+                                            let update = []
+                                            for (let k in check.endorse) {
+                                                if (check.endorse[k].searcher !== endorsement) {
+                                                    update.push(check.endorse[k])
+                                                } else {
+                                                    check.endorse[k].ignore = false
+                                                    update.push(check.endorse[k])
+                                                }
+                                            }
 
-                                    if (!found) {
-                                        endorse.push({
-                                            searcher: endorsement,
-                                            coin: coin,
-                                            tip: tip
-                                        })
+                                            await db.update('followers', { id: twitter_user.id }, { $set: { endorse: update } })
+                                            await message(
+                                                twitter_user.id_str,
+                                                "Oh no, you're now stopped endorsing " + endorsement + ".."
+                                            )
 
-                                        await db.update('followers', { id: twitter_user.id }, { $set: { endorse: endorse } })
-                                        await message(
-                                            twitter_user.id_str,
-                                            "Compliments, you're now endorsing " + endorsement + ". Each user that tweets your endorsement will receive  " + parseFloat(tip) + " $LYRA from you! Please be sure your address is always filled with some LYRA, check the balance here: https://bb.scryptachain/address/" + twitter_user.address
-                                        )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else if (text.indexOf('endorse') !== -1) {
+                        let exploded = text.split(' ')
+                        console.log('--> CHECKING ' + text)
+                        for (let j in exploded) {
+                            if (exploded[j] === 'endorse') {
+                                let check_action = await db.find('actions', { id: data.statuses[index]['id_str'] })
+                                if (check_action === null) {
+                                    await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                    console.log('---> ENDORSEMENT FOUND!')
+                                    let ni = parseInt(j) + 1
+                                    let nit = parseInt(j) + 2
+                                    let nic = parseInt(j) + 3
+                                    let endorsement = exploded[ni]
+                                    let tip = exploded[nit]
+                                    let coin = exploded[nic]
+                                    if (endorsement !== undefined && endorsement !== null && tip !== undefined && coin !== null && coin !== undefined && tip !== null && parseFloat(tip) > 0) {
+                                        var check = await db.find('followers', { id: twitter_user.id })
+                                        if (check == null) {
+                                            var ck = CoinKey.createRandom(coinInfo)
+                                            twitter_user.address = ck.publicAddress
+                                            twitter_user.prv = ck.privateWif
+                                            twitter_user.endorse = []
+                                            await db.insert('followers', twitter_user)
+                                            check = await db.find('followers', { id: twitter_user.id })
+                                        }
+
+                                        let endorse = []
+                                        let found = false
+
+                                        if (check.endorse !== undefined) {
+                                            endorse = check.endorse
+                                        }
+
+                                        for (let k in endorse) {
+                                            if (endorse[k].searcher === endorsement) {
+                                                found = true
+                                            }
+                                        }
+
+                                        if (!found) {
+                                            endorse.push({
+                                                searcher: endorsement,
+                                                coin: coin,
+                                                tip: tip
+                                            })
+
+                                            await db.update('followers', { id: twitter_user.id }, { $set: { endorse: endorse } })
+                                            await message(
+                                                twitter_user.id_str,
+                                                "Compliments, you're now endorsing " + endorsement + ". Each user that tweets your endorsement will receive  " + parseFloat(tip) + " $LYRA from you! Please be sure your address is always filled with some " + coin + "!"
+                                            )
+                                        }
                                     }
                                 }
                             }
