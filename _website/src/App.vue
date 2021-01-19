@@ -20,7 +20,7 @@
                         :src="user.image"
                       />
                     </div>
-                    <div class="col-10">
+                    <div class="col-12">
                       <h2 class="mb-0 super effect-static-text">
                         @{{ user.screen_name }}
                       </h2>
