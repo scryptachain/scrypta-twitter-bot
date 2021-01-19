@@ -1,6 +1,130 @@
 <template>
   <div id="app">
-    <div class="home theme-mode-dark">
+    <div v-if="isLogged">
+      <section
+        style="padding-top: 50px"
+        id="about"
+        class="section-1 odd highlights image-right"
+      >
+        <div class="container">
+          <div class="row">
+            <div
+              class="col-12 col-md-6 align-self-center text-center text-md-left"
+            >
+              <div class="row intro">
+                <div class="col-12 p-0">
+                  <div class="row">
+                    <div class="col-2">
+                      <img
+                        class="image-twitter"
+                        :src="user.image"
+                        alt="Twitter Bot Account"
+                      />
+                    </div>
+                    <div class="col-10">
+                      <h2 class="mb-0 super effect-static-text">
+                        @{{ user.screen_name }}
+                      </h2>
+                      <h5 style="margin-top: -10px">{{ user.name }}</h5>
+                    </div>
+                  </div>
+                  <p>
+                    Welcome! This is your Scrypta Twitter Bot account, here you
+                    can see some informations about it, likes your Scrypta
+                    reward address and private key.
+                  </p>
+                  <h6 style="color: #1e50bc">
+                    $LYRA #scrypta #scryptachain @scryptachain
+                  </h6>
+                </div>
+              </div>
+              <div class="row items">
+                <div class="col-12 p-0">
+                  <div class="row item">
+                    <div class="col-12 col-md-2 align-self-center">
+                      <i class="icon fas fa-chart-line"></i>
+                    </div>
+                    <div class="col-12 col-md-9 align-self-center">
+                      <h4>My Balance</h4>
+                      <div class="d-inline-flex justify-content-center">
+                        <p>{{ user.address }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row item">
+                    <div class="col-12 col-md-2 align-self-center">
+                      <i class="icon fab fa-twitter"></i>
+                    </div>
+                    <div class="col-12 col-md-9 align-self-center">
+                      <h4>Account address</h4>
+                      <div class="d-inline-flex justify-content-center">
+                        <p>{{ user.address }}</p>
+                        <div style="margin-left: 20px; margin-top: -5px">
+                          <div
+                            class="smooth-anchor ml-auto mr-auto ml-md-0 btn dark-button"
+                            v-clipboard:copy="user.address"
+                          >
+                            <i class="far fa-copy"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row item">
+                    <div class="col-12 col-md-2 align-self-center">
+                      <i class="icon fas fa-user"></i>
+                    </div>
+                    <div class="col-12 col-md-9 align-self-center">
+                      <h4>Reward address</h4>
+                      <div class="d-inline-flex justify-content-center">
+                        <p>{{ user.reward_address }}</p>
+                        <div style="margin-left: 20px; margin-top: -5px">
+                          <div
+                            class="smooth-anchor ml-auto mr-auto ml-md-0 btn dark-button"
+                            v-clipboard="user.reward_address"
+                          >
+                            <i class="far fa-copy"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row item">
+                    <div class="col-12 col-md-2 align-self-center">
+                      <i class="icon fas fa-key"></i>
+                    </div>
+                    <div class="col-12 col-md-9 align-self-center">
+                      <h4>Private Key</h4>
+                      <div class="d-inline-flex justify-content-center">
+                        <p>{{ user.prv }}</p>
+                        <div style="margin-left: 20px; margin-top: -5px">
+                          <div
+                            class="smooth-anchor ml-auto mr-auto ml-md-0 btn dark-button"
+                            v-clipboard="user.prv"
+                            v-clipboard:success="clipboardSuccessHandler"
+                            v-clipboard:error="clipboardErrorHandler"
+                          >
+                            <i class="far fa-copy"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="gallery col-12 col-md-6">
+              <img
+                style="margin-top: 30%"
+                src="assets/images/twitter_2.png"
+                alt="About Us"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div v-if="isLogged === false" class="home theme-mode-dark">
       <!-- Header -->
       <header id="header">
         <!-- Navbar -->
@@ -30,7 +154,9 @@
                 <a href="#how" class="nav-link smooth-anchor">How it Works</a>
               </li>
               <li class="nav-item">
-                <a href="#tools" class="nav-link smooth-anchor">Other functions</a>
+                <a href="#tools" class="nav-link smooth-anchor"
+                  >Other functions</a
+                >
               </li>
               <li class="nav-item">
                 <a href="#specs" class="nav-link smooth-anchor">Requirements</a>
@@ -128,11 +254,11 @@
                       rain!
                     </p>
                     <a
-                      href="#contact"
+                      href="/twitter/login"
                       data-aos="zoom-out-up"
                       data-aos-delay="1200"
                       class="smooth-anchor ml-auto mr-auto ml-md-0 mt-4 btn dark-button"
-                      ><i class="icon-cup"></i>GET STARTED</a
+                      ><i class="icon-cup"></i>LOGIN</a
                     >
                   </div>
                 </div>
@@ -303,18 +429,7 @@
       <section id="tools" class="section-3 highlights image-left">
         <div class="container">
           <div class="row">
-            <div class="gallery col-12 col-md-6">
-              <div>
-                <img
-                  src="assets/images/twitter_2.png"
-                  class="fit-image"
-                  alt="Scrypta Twitter Bot"
-                />
-              </div>
-            </div>
-            <div
-              class="col-12 col-md-6 pl-md-5 align-self-center text-center text-md-left"
-            >
+            <div class="col-12 align-self-center text-center text-md-left">
               <div class="row intro">
                 <div class="col-12 p-0">
                   <h2
@@ -325,7 +440,8 @@
                     Other Functions
                   </h2>
                   <p style="color: #f5f5f5">
-                    Explore other functions of Scrypta Twitter Bot. You can personalize your account and tips your friends!
+                    Explore other functions of Scrypta Twitter Bot. You can
+                    personalize your account and tips your friends!
                   </p>
                 </div>
               </div>
@@ -333,12 +449,41 @@
                 <div class="col-12 p-0">
                   <div class="row item">
                     <div class="col-12 col-md-2 align-self-center">
+                      <i class="icon fas fa-share-alt"></i>
+                    </div>
+                    <div class="col-12 col-md-9 align-self-center">
+                      <h3 style="color: #1e50bc">
+                        Endorse an @user or an #hashtag
+                      </h3>
+                      <p>
+                        Become an endorser! You can give rewards to your
+                        followers with your Lyra for each interaction with your
+                        twitter profile or for your favourite #hashtags.
+                        <br /><br />
+                        Share a post on twitter using either or both of these
+                        commands to start raising awareness of your profile!
+                      </p>
+                      <h5 style="color: #84a5eb">
+                        #scryptabot endorse @user 1 LYRA
+                      </h5>
+                      <h5 style="color: #84a5eb">
+                        #scryptabot endorse #bitcoin 1 LYRA
+                      </h5>
+                    </div>
+                  </div>
+                  <div class="row item">
+                    <div class="col-12 col-md-2 align-self-center">
                       <i class="icon icon-social-twitter"></i>
                     </div>
                     <div class="col-12 col-md-9 align-self-center">
-                      <h3 style="color: #1E50BC">Update your address</h3>
-                      <p>Write a simple post with your twitter account to change the address for receive rewards.</p>
-                      <h5 style="color: #84A5EB">#scryptabot address L.....</h5>
+                      <h3 style="color: #1e50bc">Set your own address</h3>
+                      <p>
+                        Write a simple post with your twitter account to change
+                        the address for receive rewards.
+                      </p>
+                      <h5 style="color: #84a5eb">
+                        #scryptabot address YourLyraAddress
+                      </h5>
                     </div>
                   </div>
                   <div class="row item">
@@ -346,10 +491,27 @@
                       <span class="icon">@</span>
                     </div>
                     <div class="col-12 col-md-9 align-self-center">
-                      <h3 style="color: #1E50BC">Send a tip</h3>
-                      <p>Do you want send a tip at another user? You have just write a post, tag your friend and enter an amount!</p>
-                      <h5 style="color: #84A5EB">#scryptabot tip @user 1</h5>
-                      <em> <span style="color: #1E50BC; font-weight: 600; font-size: 35px;">* </span>Pay attention: if you change the address linked to the bot, you will not be able to use this function.</em>
+                      <h3 style="color: #1e50bc">Send a tip</h3>
+                      <p>
+                        Do you want send a tip at another user? You have just
+                        write a post, tag your friend and enter an amount!
+                      </p>
+                      <h5 style="color: #84a5eb">#scryptabot tip @user 1</h5>
+                    </div>
+                  </div>
+                  <div class="row item">
+                    <div class="col-12 col-md-2 align-self-center">
+                      <i class="icon fas fa-arrow-down"></i>
+                    </div>
+                    <div class="col-12 col-md-9 align-self-center">
+                      <h3 style="color: #1e50bc">Withdraw</h3>
+                      <p>
+                        Do you want send a tip at another user? You have just
+                        write a post, tag your friend and enter an amount!
+                      </p>
+                      <h5 style="color: #84a5eb">
+                        #scryptabot withdraw YourLyraAddress amount
+                      </h5>
                     </div>
                   </div>
                 </div>
@@ -360,11 +522,21 @@
       </section>
 
       <!-- specs -->
-      <section id="specs" class="section-3 odd counter funfacts featured">
+      <section
+        style="padding-top: 20px"
+        id="specs"
+        class="section-3 odd counter funfacts featured"
+      >
         <div class="container">
           <div class="row text-center intro">
             <div class="col-12">
-              <h2>Some Rules</h2>
+              <h2
+                data-aos="zoom-out-up"
+                data-aos-delay="400"
+                class="title effect-static-text"
+              >
+                Some Rules
+              </h2>
               <p class="text-max-800">
                 In order to receive rewards in Lyra for interactions with our
                 official Twitter page, you will need to meet these requirements
@@ -378,29 +550,35 @@
             data-aos-delay="200"
             class="row justify-content-center text-center items"
           >
-            <div class="col-12 col-md-6 col-lg-3 item">
-              <div data-percent="1" class="radial">
+            <div class="col-12 col-md-6 col-lg-2 item">
+              <div data-percent="60" class="radial">
                 <span></span>
               </div>
-              <h4>Account since 1 Month</h4>
+              <h4>Account since 60 days</h4>
             </div>
-            <div class="col-12 col-md-6 col-lg-3 item">
-              <div data-percent="15" class="radial">
+            <div class="col-12 col-md-6 col-lg-2 item">
+              <div data-percent="360" class="radial">
                 <span></span>
               </div>
               <h4>Minutes per interaction</h4>
             </div>
-            <div class="col-12 col-md-6 col-lg-3 item">
+            <div class="col-12 col-md-6 col-lg-2 item">
               <div data-percent="75" class="radial">
                 <span></span>
               </div>
               <h4>Minimum followers</h4>
             </div>
-            <div class="col-12 col-md-6 col-lg-3 item">
-              <div data-percent="1" class="radial">
+            <div class="col-12 col-md-6 col-lg-2 item">
+              <div data-percent="3" class="radial">
                 <span></span>
               </div>
-              <h4>1 LYRA per reaction</h4>
+              <h4>LYRA per first reaction</h4>
+            </div>
+            <div class="col-12 col-md-6 col-lg-2 item">
+              <div data-percent="0.5" class="radial">
+                <span></span>
+              </div>
+              <h4>LYRA per reaction</h4>
             </div>
           </div>
         </div>
@@ -660,6 +838,28 @@
 <script>
 export default {
   name: "App",
+
+  data() {
+    return {
+      isLogged: false,
+      user: {},
+      message: "Copy these Text",
+    };
+  },
+  methods: {
+    onCopy: function (e) {
+      alert("You just copied: " + e.text);
+    },
+  },
+
+  mounted() {
+    const app = this;
+    if (localStorage.getItem("user") !== null) {
+      app.isLogged = true;
+      app.user = JSON.parse(localStorage.getItem("user"));
+    }
+  },
+
   components: {},
 };
 </script>
@@ -671,7 +871,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 0px;
 }
 
 :root {
