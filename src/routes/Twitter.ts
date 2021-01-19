@@ -82,10 +82,10 @@ export function getAccessToken(req: express.Request, res: express.res) {
                         const db = new Database.Mongo
                         let userDB = await db.find('followers', { id: user.id })
                         if (userDB !== null && userDB.address !== undefined) {
-                            if (userDB.prv !== undefined) {
+                            if (userDB.reward_address === undefined) {
                                 res.send("<div style='padding: 30px;'><h1>Well done!</h1>You're connected with the address <b>" + userDB.address + "</b><br>which have been created by us.<br><br>The private key is: " + userDB.prv + ".<br><br><span style='color:#f00'>You should change your address by tweeting: `#scryptabot address YourLyraAddress`</span><br><br>Don't forget to import your private key into Manent or Scrypta Core Wallet!</div>")
                             } else {
-                                res.send("<div style='padding: 30px;'><h1>Well done!</h1>You're connected with the address <b>" + userDB.address + "</b><br><br><span style='color:green'>Well done! You have connected your address :-)</span></div>")
+                                res.send("<div style='padding: 30px;'><h1>Well done!</h1>You're connected with the address <b>" + userDB.reward_address + "</b><br><br><span style='color:green'>You can continue use our provided address <b>" + userDB.address + "</b> to interact with other people on Twitter!<br>The private key of this <b>last</b> address is: " + userDB.prv + ".</span></div>")
                             }
                         } else {
                             var ck = CoinKey.createRandom(coinInfo)
@@ -213,7 +213,7 @@ export async function commands() {
                                 var check = await db.find('followers', { id: twitter_user.id })
                                 if (check === null) {
                                     console.log('CREATING NEW FOLLWER WITH ADDRESS ' + address + '!')
-                                    twitter_user.address = address
+                                    twitter_user.reward_address = address
                                     await db.insert('followers', twitter_user)
                                     await message(
                                         twitter_user.id_str,
@@ -221,10 +221,10 @@ export async function commands() {
                                     )
                                 } else if (check.address !== address) {
                                     console.log('UPDATING USER ' + twitter_user.screen_name + ' WITH ADDRESS ' + address)
-                                    await db.update('followers', { id: twitter_user.id }, { $set: { address: address } })
+                                    await db.update('followers', { id: twitter_user.id }, { $set: { reward_address: address } })
                                     await message(
                                         twitter_user.id_str,
-                                        "Compliments, your address is now updated with " + address + "!"
+                                        "Compliments, your reward address is now updated with " + address + "! You can continue use " + check.address + " to send coins and interact with other people!"
                                     )
                                 }
                             }
@@ -370,15 +370,19 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
             var address = user.address
             var pubAddr = ''
 
-            if (address !== undefined) {
-                //SEND TO ADDRESS
-                pubAddr = address
-            } else {
-                //CREATE ADDRESS FOR USER
-                var ck = CoinKey.createRandom(coinInfo)
-                pubAddr = ck.publicAddress
-                await db.update('followers', { id: twitter_user.id }, { $set: { address: pubAddr, prv: ck.privateWif } })
-                address = pubAddr
+            if(user.reward_address === undefined){
+                if (address !== undefined) {
+                    //SEND TO ADDRESS
+                    pubAddr = address
+                } else {
+                    //CREATE ADDRESS FOR USER
+                    var ck = CoinKey.createRandom(coinInfo)
+                    pubAddr = ck.publicAddress
+                    await db.update('followers', { id: twitter_user.id }, { $set: { address: pubAddr, prv: ck.privateWif } })
+                    address = pubAddr
+                }
+            }else{
+                pubAddr = user.reward_address
             }
 
             if (address !== undefined) {
