@@ -162,26 +162,28 @@ export async function tag(tag, twitter_user) {
                     var user_mention = mentions[index].user.screen_name
                     var user_id = mentions[index].user.id
                     var user_mention_followers = mentions[index].user.followers_count
-                    if (user_mention_followers >= process.env.MIN_FOLLOWERS) {
-                        var mention_id = mentions[index]['id_str']
-                        var tipped = await db.find('mentions', { mention_id: mention_id, user_id: user_id })
-                        if (tipped === null && user_mention !== process.env.TWITTER_USERNAME && user_mention !== process.env.TWITTER_BOT) {
-                            var user_registration = new Date(mentions[index].user.created_at)
-                            var now = new Date();
-                            var diff = now.getTime() - user_registration.getTime();
-                            var elapsed = diff / (1000 * 60 * 60 * 24)
-                            if (elapsed > parseInt(process.env.MIN_DAYS)) {
-                                let tip = await tipuser(mentions[index].user, 'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN)
-                                if (tip !== 'ERROR') {
-                                    newmentions++
-                                    await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                    if (user_mention !== process.env.TWITTER_BOT) {
+                        if (user_mention_followers >= process.env.MIN_FOLLOWERS) {
+                            var mention_id = mentions[index]['id_str']
+                            var tipped = await db.find('mentions', { mention_id: mention_id, user_id: user_id })
+                            if (tipped === null && user_mention !== process.env.TWITTER_USERNAME && user_mention !== process.env.TWITTER_BOT) {
+                                var user_registration = new Date(mentions[index].user.created_at)
+                                var now = new Date();
+                                var diff = now.getTime() - user_registration.getTime();
+                                var elapsed = diff / (1000 * 60 * 60 * 24)
+                                if (elapsed > parseInt(process.env.MIN_DAYS)) {
+                                    let tip = await tipuser(mentions[index].user, 'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN)
+                                    if (tip !== 'ERROR') {
+                                        newmentions++
+                                        await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                                    }
+                                } else {
+                                    console.log('USER ' + user_mention + ' IS TOO YOUNG.')
                                 }
-                            } else {
-                                console.log('USER ' + user_mention + ' IS TOO YOUNG.')
                             }
+                        } else {
+                            console.log('USER ' + user_mention + ' DON\'T HAVE THE REQUIRED FOLLOWERS (' + user_mention_followers + ')')
                         }
-                    } else {
-                        console.log('USER ' + user_mention + ' DON\'T HAVE THE REQUIRED FOLLOWERS (' + user_mention_followers + ')')
                     }
                 }
                 console.log('FOUND ' + newmentions + ' NEW CASHTAGS MENSIONS')
