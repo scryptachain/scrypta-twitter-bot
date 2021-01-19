@@ -61,7 +61,7 @@
                       </div>
                     </div>
                   </div>
-                  <div class="row item">
+                  <div class="row item" v-if="user.reward_address.length > 0">
                     <div class="col-12 col-md-2 align-self-center">
                       <i class="icon fas fa-user"></i>
                     </div>
