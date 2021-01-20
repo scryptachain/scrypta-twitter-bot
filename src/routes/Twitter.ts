@@ -260,7 +260,7 @@ export async function commands() {
                                                 const wallet = new Crypto.Scrypta
                                                 let coin = <any>'LYRA'
                                                 if (exploded[4] !== undefined) {
-                                                    coin = <any>await wallet.returnCoinAddress(coin)
+                                                    coin = <any>await wallet.returnCoinAddress(exploded[4])
                                                 }
                                                 if (coin !== false) {
                                                     if (testmode === false) {
