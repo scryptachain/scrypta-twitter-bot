@@ -505,7 +505,7 @@ export async function commands() {
                                                         }
                                                     } else if (coin.substr(0, 1) === '6') {
                                                         try {
-                                                            console.log('SENDING TOKENS FROM ' + sender_user.address + ' TO ' + address)
+                                                            console.log('SENDING TOKENS FROM ' + sender_user.address + ' TO ' + address + ' USING ' + coin)
                                                             let sent = <any>await wallet.sendPlanum(sender_user.prv, sender_user.address, address, amount, coin)
                                                             if (sent !== 'NO_BALANCE') {
                                                                 if (sent !== false && sent !== null && sent.length === 64) {
@@ -760,10 +760,9 @@ export async function endorse(tag, twitter_user, coin, amount) {
                                                         console.log("SENDING ERROR, WILL RETRY LATER")
                                                     }
                                                 } else {
-                                                    let sidechain_address = await wallet.returnCoinAddress(coin)
                                                     try {
                                                         console.log('SENDING TOKENS FROM ' + twitter_user.address + ' TO ' + totip_user.address)
-                                                        let sent = <any>await wallet.sendPlanum(twitter_user.prv, twitter_user.address, totip_user.address, amount, sidechain_address)
+                                                        let sent = <any>await wallet.sendPlanum(twitter_user.prv, twitter_user.address, totip_user.address, amount, coin)
                                                         if (sent !== 'NO_BALANCE') {
                                                             if (sent !== false && sent !== null && sent.length === 64) {
                                                                 await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
