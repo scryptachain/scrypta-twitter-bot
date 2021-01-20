@@ -115,9 +115,13 @@ module Crypto {
             return new Promise(async response => {
                 const scrypta = new ScryptaCore
                 scrypta.staticnodes = true
+                console.log('USING ' + sidechain)
                 scrypta.usePlanum(sidechain)
                 console.log('CHECKING BALANCE OF ' + from)
-                let balance = await scrypta.returnPlanumBalance(from)
+                let balance = await scrypta.post('/sidechain/balance', {
+                    dapp_address: from,
+                    sidechain_address: sidechain
+                })
                 if (balance.balance >= amount) {
                     try {
                         console.log('SENDING TOKENS FROM ' + from + ' TO ' + to)
