@@ -25,9 +25,14 @@ const coinInfo = {
 var _requestSecret
 if (process.env.TWITTER_CONSUMERKEY !== undefined && process.env.TWITTER_CONSUMERSECRET !== undefined) {
     var twtlogin = new twitterlogin({
-        consumerKey: process.env.TWITTER_CONSUMERKEY,
+        consumerKey: process.env.TWITTER_CONSUMERRKEY,
         consumerSecret: process.env.TWITTER_CONSUMERSECRET,
         callback: process.env.URL + '/twitter/callback'
+    });
+    var publisherlogin = new twitterlogin({
+        consumerKey: process.env.TWITTER_PUBLISHERKEY,
+        consumerSecret: process.env.TWITTER_PUBLISHERSECRET,
+        callback: process.env.URL + '/twitter/publisher'
     });
 } else {
     console.log('\x1b[41m%s\x1b[0m', 'SETUP TWITTER FIRST!')
@@ -46,6 +51,17 @@ export function getAuth(req: express.Request, res: express.res) {
         if (err)
             res.status(500).send(err);
         else {
+            _requestSecret = requestSecret;
+            res.redirect("https://api.twitter.com/oauth/authenticate?oauth_token=" + requestToken);
+        }
+    });
+}
+
+export function getAuthPublisher(req: express.Request, res: express.res) {
+    publisherlogin.getRequestToken(function (err, requestToken, requestSecret) {
+        if (err){
+            res.status(500).send(err);
+        } else {
             _requestSecret = requestSecret;
             res.redirect("https://api.twitter.com/oauth/authenticate?oauth_token=" + requestToken);
         }
@@ -104,6 +120,40 @@ export function getAccessToken(req: express.Request, res: express.res) {
     });
 
 }
+
+export function getPublisherToken(req: express.Request, res: express.res) {
+    var requestToken = req.query.oauth_token,
+        verifier = req.query.oauth_verifier;
+
+        publisherlogin.getAccessToken(requestToken, _requestSecret, verifier, function (err, accessToken, accessSecret) {
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            publisherlogin.verifyCredentials(accessToken, accessSecret, async function (err, user) {
+                if (err) {
+                    res.status(500).send(err);
+                } else {
+                    if (process.env.TWITTER_ACCESSTOKEN === undefined) {
+                        res.send({
+                            user
+                        });
+                        const fs = require('fs');
+                        fs.appendFile('.env', "\r\n" + 'TWITTER_ACCESSTOKEN=' + accessToken, function (err) {
+                            console.log('ACCESS TOKEN WRITTEN')
+                        })
+                        fs.appendFile('.env', "\r\n" + 'TWITTER_TOKENSECRET=' + accessSecret, function (err) {
+                            console.log('TOKEN SECRET WRITTEN')
+                        })
+                        fs.appendFile('.env', "\r\n" + 'TWITTER_USERNAME=' + user.screen_name, function (err) {
+                            console.log('USERNAME WRITTEN')
+                        })
+                    }
+                }
+            });
+        }
+    });
+}
+
 
 export async function followers(twitter_user) {
     return new Promise(async response => {
