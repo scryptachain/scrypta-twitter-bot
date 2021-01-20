@@ -257,41 +257,71 @@ export async function commands() {
                                         if (totip_user !== null) {
                                             let amount = parseFloat(exploded[3])
                                             if (amount > 0) {
-                                                if (testmode === false) {
-                                                    const scrypta = new ScryptaCore
-                                                    scrypta.staticnodes = true
-                                                    console.log('CHECKING BALANCE OF ' + sender_user.address)
-                                                    let balance = await scrypta.get('/balance/' + sender_user.address)
-                                                    if (balance.balance >= amount) {
-                                                        try {
-                                                            console.log('SENDING COINS FROM ' + sender_user.address + ' TO ' + totip_user.address)
-                                                            let temp = await scrypta.importPrivateKey(sender_user.prv, '-', false)
-                                                            let sent = await scrypta.send(temp.walletstore, '-', totip_user.address, amount)
-                                                            if (sent !== false && sent !== null && sent.length === 64) {
-                                                                await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: 'LYRA', channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
-                                                                await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $LYRA to @' + totip_user.screen_name + '. Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
-                                                            } else {
-                                                                console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                                const wallet = new Crypto.Scrypta
+                                                let coin = <any>'LYRA'
+                                                if (exploded[4] !== undefined) {
+                                                    coin = <any>await wallet.returnCoinAddress(coin)
+                                                }
+                                                if (coin !== false) {
+                                                    if (testmode === false) {
+                                                        if (coin === 'LYRA') {
+                                                            try {
+                                                                console.log('SENDING COINS FROM ' + sender_user.address + ' TO ' + totip_user.address)
+                                                                let sent = <any>await wallet.sendLyra(sender_user.prv, sender_user.address, totip_user.address, amount)
+                                                                if (sent !== 'NO_BALANCE') {
+                                                                    if (sent !== false && sent !== null && sent.length === 64) {
+                                                                        await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
+                                                                        await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                                        await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $' + coin + ' to @' + totip_user.screen_name + '. Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
+                                                                    } else {
+                                                                        console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                                                    }
+                                                                } else {
+                                                                    await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                                    console.log("NOT ENOUGH BALANCE.")
+                                                                }
+                                                            } catch (e) {
+                                                                console.log("SENDING ERROR, WILL RETRY LATER")
                                                             }
-                                                        } catch (e) {
-                                                            console.log(e)
-                                                            console.log("SENDING ERROR, WILL RETRY LATER")
+                                                        } else if (coin.substr(0, 1) === '6') {
+                                                            try {
+                                                                console.log('SENDING TOKENS FROM ' + sender_user.address + ' TO ' + totip_user.address)
+                                                                let sent = <any>await wallet.sendPlanum(sender_user.prv, sender_user.address, totip_user.address, amount, coin)
+                                                                if (sent !== 'NO_BALANCE') {
+                                                                    if (sent !== false && sent !== null && sent.length === 64) {
+                                                                        await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
+                                                                        await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                                        await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $' + coin + ' to @' + totip_user.screen_name + '. Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
+                                                                    } else {
+                                                                        console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                                                    }
+                                                                } else {
+                                                                    await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                                    console.log("NOT ENOUGH BALANCE.")
+                                                                }
+                                                            } catch (e) {
+                                                                console.log("SENDING ERROR, WILL RETRY LATER")
+                                                            }
                                                         }
                                                     } else {
-                                                        console.log("NOT ENOUGH BALANCE, IGNORING MESSAGE.")
+                                                        console.log('STORING IN DB, TESTMODE IS ON')
                                                         await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                        await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: 'LYRA', channel: 'TWITTER', address: totip_user.address, txid: 'TXIDHASH', source: twitter_user.screen_name })
                                                     }
                                                 } else {
-                                                    console.log('STORING IN DB, TESTMODE IS ON')
-                                                    await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: 'LYRA', channel: 'TWITTER', address: totip_user.address, txid: 'TXIDHASH', source: twitter_user.screen_name })
+                                                    await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                    console.log('COIN IS NOT VALID')
                                                 }
                                             } else {
+                                                await db.insert('actions', { id: data.statuses[index]['id_str'] })
                                                 console.log('AMOUNT IS NOT VALID ' + amount)
                                             }
                                         } else {
+                                            await db.insert('actions', { id: data.statuses[index]['id_str'] })
                                             console.log("USER DON'T EXISTS!")
                                         }
                                     } else {
+                                        await db.insert('actions', { id: data.statuses[index]['id_str'] })
                                         console.log('USER IS NOT REGISTERED TO SERVICE.')
                                     }
                                 }
@@ -374,6 +404,7 @@ export async function commands() {
                             if (exploded[j] === 'endorse') {
                                 let check_action = await db.find('actions', { id: data.statuses[index]['id_str'] })
                                 if (check_action === null) {
+                                    const wallet = new Crypto.Scrypta
                                     await db.insert('actions', { id: data.statuses[index]['id_str'] })
                                     console.log('---> ENDORSEMENT FOUND!')
                                     let ni = parseInt(j) + 1
@@ -381,44 +412,50 @@ export async function commands() {
                                     let nic = parseInt(j) + 3
                                     let endorsement = exploded[ni]
                                     let tip = exploded[nit]
-                                    let coin = exploded[nic]
-                                    if (endorsement !== undefined && endorsement !== null && tip !== undefined && coin !== null && coin !== undefined && tip !== null && parseFloat(tip) > 0) {
-                                        var check = await db.find('followers', { id: twitter_user.id })
-                                        if (check == null) {
-                                            var ck = CoinKey.createRandom(coinInfo)
-                                            twitter_user.address = ck.publicAddress
-                                            twitter_user.prv = ck.privateWif
-                                            twitter_user.endorse = []
-                                            await db.insert('followers', twitter_user)
-                                            check = await db.find('followers', { id: twitter_user.id })
-                                        }
+                                    let coin = exploded[nic].replace('$', '')
+                                    let ticker = await wallet.checkAvailableCoin(coin)
 
-                                        let endorse = []
-                                        let found = false
+                                    if (ticker !== false) {
+                                        if (endorsement !== undefined && endorsement !== null && tip !== undefined && coin !== null && coin !== undefined && tip !== null && parseFloat(tip) > 0) {
+                                            var check = await db.find('followers', { id: twitter_user.id })
+                                            if (check == null) {
+                                                var ck = CoinKey.createRandom(coinInfo)
+                                                twitter_user.address = ck.publicAddress
+                                                twitter_user.prv = ck.privateWif
+                                                twitter_user.endorse = []
+                                                await db.insert('followers', twitter_user)
+                                                check = await db.find('followers', { id: twitter_user.id })
+                                            }
 
-                                        if (check.endorse !== undefined) {
-                                            endorse = check.endorse
-                                        }
+                                            let endorse = []
+                                            let found = false
 
-                                        for (let k in endorse) {
-                                            if (endorse[k].searcher === endorsement) {
-                                                found = true
+                                            if (check.endorse !== undefined) {
+                                                endorse = check.endorse
+                                            }
+
+                                            for (let k in endorse) {
+                                                if (endorse[k].searcher === endorsement) {
+                                                    found = true
+                                                }
+                                            }
+
+                                            if (!found) {
+                                                endorse.push({
+                                                    searcher: endorsement,
+                                                    coin: coin,
+                                                    tip: tip
+                                                })
+
+                                                await db.update('followers', { id: twitter_user.id }, { $set: { endorse: endorse } })
+                                                await message(
+                                                    twitter_user.id_str,
+                                                    "Compliments, you're now endorsing " + endorsement + ". Each user that tweets your endorsement will receive  " + parseFloat(tip) + " $" + ticker + " from you! Please be sure your address is always filled with some $" + ticker + "!"
+                                                )
                                             }
                                         }
-
-                                        if (!found) {
-                                            endorse.push({
-                                                searcher: endorsement,
-                                                coin: coin,
-                                                tip: tip
-                                            })
-
-                                            await db.update('followers', { id: twitter_user.id }, { $set: { endorse: endorse } })
-                                            await message(
-                                                twitter_user.id_str,
-                                                "Compliments, you're now endorsing " + endorsement + ". Each user that tweets your endorsement will receive  " + parseFloat(tip) + " $LYRA from you! Please be sure your address is always filled with some " + coin + "!"
-                                            )
-                                        }
+                                    } else {
+                                        console.log(coin + ' IS NOT AVAILABLE.')
                                     }
                                 }
                             }
@@ -433,31 +470,61 @@ export async function commands() {
                                     var sender_user = await db.find('followers', { id: twitter_user.id })
                                     if (sender_user !== null && sender_user.prv !== undefined) {
                                         if (testmode === false) {
+                                            const wallet = new Crypto.Scrypta
                                             let amount = parseFloat(exploded[3])
                                             let address = exploded[2]
-                                            if (amount > 0) {
-                                                const scrypta = new ScryptaCore
-                                                scrypta.staticnodes = true
-                                                console.log('CHECKING BALANCE OF ' + sender_user.address)
-                                                let balance = await scrypta.get('/balance/' + sender_user.address)
-                                                if (balance.balance >= amount) {
-                                                    try {
-                                                        console.log('SENDING COINS FROM ' + sender_user.address + ' TO ' + address)
-                                                        let temp = await scrypta.importPrivateKey(sender_user.prv, '-', false)
-                                                        let sent = await scrypta.send(temp.walletstore, '-', address, amount)
-                                                        if (sent !== false && sent !== null && sent.length === 64) {
-                                                            await db.insert('actions', { id: data.statuses[index]['id_str'] })
-                                                            await post('@' + twitter_user.screen_name + ' just withdrew ' + amount + ' $LYRA! Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
-                                                        } else {
-                                                            console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                            let coin = <any>'LYRA'
+                                            let ticker = <any>'LYRA'
+                                            if (exploded[3] !== undefined) {
+                                                coin = <any>await wallet.returnCoinAddress(coin)
+                                                ticker = <any>await wallet.checkAvailableCoin(coin)
+                                            }
+                                            if (coin !== false) {
+                                                if (amount > 0) {
+                                                    if (coin === 'LYRA') {
+                                                        try {
+                                                            console.log('SENDING COINS FROM ' + sender_user.address + ' TO ' + address)
+                                                            let sent = <any>await wallet.sendLyra(sender_user.prv, sender_user.address, address, amount)
+                                                            if (sent !== 'NO_BALANCE') {
+                                                                if (sent !== false && sent !== null && sent.length === 64) {
+                                                                    await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                                    await post('@' + twitter_user.screen_name + ' just withdrew ' + amount + ' $' + ticker + '! Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
+                                                                } else {
+                                                                    console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                                                }
+                                                            } else {
+                                                                await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                                console.log("NOT ENOUGH BALANCE.")
+                                                            }
+                                                        } catch (e) {
+                                                            console.log("SENDING ERROR, WILL RETRY LATER")
                                                         }
-                                                    } catch (e) {
-                                                        console.log(e)
-                                                        console.log("SENDING ERROR, WILL RETRY LATER")
+                                                    } else if (coin.substr(0, 1) === '6') {
+                                                        try {
+                                                            console.log('SENDING TOKENS FROM ' + sender_user.address + ' TO ' + address)
+                                                            let sent = <any>await wallet.sendPlanum(sender_user.prv, sender_user.address, address, amount, coin)
+                                                            if (sent !== 'NO_BALANCE') {
+                                                                if (sent !== false && sent !== null && sent.length === 64) {
+                                                                    await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                                    await post('@' + twitter_user.screen_name + ' just withdrew ' + amount + ' $' + ticker + '! Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
+                                                                } else {
+                                                                    console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                                                }
+                                                            } else {
+                                                                await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                                console.log("NOT ENOUGH BALANCE.")
+                                                            }
+                                                        } catch (e) {
+                                                            console.log("SENDING ERROR, WILL RETRY LATER")
+                                                        }
                                                     }
+                                                } else {
+                                                    await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                    console.log('AMOUNT IS NOT VALID ' + amount)
                                                 }
                                             } else {
-                                                console.log('AMOUNT IS NOT VALID ' + amount)
+                                                await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                console.log('COIN IS NOT VALID')
                                             }
                                         } else {
                                             console.log('STORING IN DB, TESTMODE IS ON')
@@ -577,7 +644,7 @@ export async function tipuser(twitter_user, action, action_id, amount, coin) {
 
             if (address !== undefined) {
                 console.log('PUB ADDRESS IS ' + pubAddr)
-                var wallet = new Crypto.Wallet;
+                var wallet = new Crypto.Scrypta;
                 wallet.request('getinfo').then(function (info) {
                     if (info !== undefined) {
                         if (testmode === false) {
@@ -648,12 +715,11 @@ export async function endorse(tag, twitter_user, coin, amount) {
                                 var diff = now.getTime() - user_registration.getTime();
                                 var elapsed = diff / (1000 * 60 * 60 * 24)
                                 if (elapsed > parseInt(process.env.MIN_DAYS)) {
-
                                     const scrypta = new ScryptaCore
                                     scrypta.staticnodes = true
-                                    console.log('CHECKING USER BALANCE')
-                                    let balance = await scrypta.get('/balance/' + twitter_user.address)
-                                    if (balance.balance >= amount) {
+
+                                    const wallet = new Crypto.Scrypta
+                                    if (coin !== false) {
                                         let totip_user = await db.find('followers', { screen_name: user_mention })
                                         if (totip_user === null) {
                                             console.log('CREATING NEW TIPPED USER @' + user_mention + '!')
@@ -666,35 +732,77 @@ export async function endorse(tag, twitter_user, coin, amount) {
                                         }
                                         if (totip_user !== null) {
                                             if (testmode === false) {
-                                                try {
-                                                    scrypta.debug = true
-                                                    let temp = await scrypta.importPrivateKey(twitter_user.prv, '-', false)
-                                                    let sent = await scrypta.send(temp.walletstore, '-', totip_user.address, amount)
-                                                    if (sent !== false && sent !== null && sent.length === 64) {
-                                                        await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: 'LYRA', channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
-                                                        await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $LYRA to @' + totip_user.screen_name + ' because endorsed ' + tag + ' Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
-                                                        await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
-                                                        newmentions++
-                                                        console.log("ENDORSEMENT TIP SENT!")
-                                                    } else {
-                                                        console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                                if (coin === 'LYRA') {
+                                                    try {
+                                                        console.log('SENDING COINS FROM ' + twitter_user.address + ' TO ' + twitter_user.address)
+                                                        let sent = <any>await wallet.sendLyra(twitter_user.prv, twitter_user.address, totip_user.address, amount)
+                                                        if (sent !== 'NO_BALANCE') {
+                                                            if (sent !== false && sent !== null && sent.length === 64) {
+                                                                await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: 'LYRA', channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
+                                                                await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $LYRA to @' + totip_user.screen_name + ' because endorsed ' + tag + ' Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
+                                                                await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                                                                await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                                newmentions++
+                                                                console.log("ENDORSEMENT TIP SENT!")
+                                                            } else {
+                                                                console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                                            }
+                                                        } else {
+                                                            await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                                                            await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                            console.log("NOT ENOUGH BALANCE.")
+                                                        }
+                                                    } catch (e) {
+                                                        console.log("SENDING ERROR, WILL RETRY LATER")
                                                     }
-                                                } catch (e) {
-                                                    console.log(e)
-                                                    console.log("SENDING ERROR, WILL RETRY LATER")
+                                                } else {
+                                                    let sidechain_address = await wallet.returnCoinAddress(coin)
+                                                    try {
+                                                        console.log('SENDING TOKENS FROM ' + twitter_user.address + ' TO ' + totip_user.address)
+                                                        let sent = <any>await wallet.sendPlanum(twitter_user.prv, twitter_user.address, totip_user.address, amount, sidechain_address)
+                                                        if (sent !== 'NO_BALANCE') {
+                                                            if (sent !== false && sent !== null && sent.length === 64) {
+                                                                await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
+                                                                await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $' + coin + ' to @' + totip_user.screen_name + ' because endorsed ' + tag + ' Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
+                                                                await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                                                                await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                                newmentions++
+                                                                console.log("ENDORSEMENT TIP SENT!")
+                                                            } else {
+                                                                console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
+                                                            }
+                                                        } else {
+                                                            await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                                                            await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                            console.log("NOT ENOUGH BALANCE.")
+                                                        }
+                                                    } catch (e) {
+                                                        console.log("SENDING ERROR, WILL RETRY LATER")
+                                                    }
                                                 }
                                             } else {
-                                                console.log("ENDORSEMENT TIP SENT!")
+                                                console.log('STORING IN DB, TESTMODE IS ON')
                                                 await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
-                                                newmentions++
+                                                await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: twitter_user.address, txid: 'TXIDHASH', source: twitter_user.screen_name })
                                             }
+                                        } else {
+                                            await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                                            await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                            console.log('COIN IS NOT VALID')
                                         }
+                                    } else {
+                                        await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
+                                        await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                        console.log('COIN IS NOT VALID')
                                     }
                                 } else {
+                                    await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
                                     console.log('USER ' + user_mention + ' IS TOO YOUNG.')
                                 }
                             }
                         } else {
+                            await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
                             console.log('USER ' + user_mention + ' DON\'T HAVE THE REQUIRED FOLLOWERS (' + user_mention_followers + ')')
                         }
                     }

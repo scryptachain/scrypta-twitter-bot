@@ -42,7 +42,7 @@ class App {
   }
 
   run() {
-    var wallet = new Crypto.Wallet;
+    var wallet = new Crypto.Scrypta;
     wallet.request('getinfo').then(async info => {
       if (info !== undefined) {
         console.log('WALLET STATUS', info)
