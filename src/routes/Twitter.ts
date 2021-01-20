@@ -291,7 +291,7 @@ export async function commands() {
                                                                     if (sent !== false && sent !== null && sent.length === 64) {
                                                                         await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
                                                                         await db.insert('actions', { id: data.statuses[index]['id_str'] })
-                                                                        await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $' + coin + ' to @' + totip_user.screen_name + '. Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
+                                                                        await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $' + coin + ' to @' + totip_user.screen_name + '. Check the transaction here: https://chains.planum.dev/#/transaction/' + coin + '/' + sent)
                                                                     } else {
                                                                         console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
                                                                     }
@@ -448,7 +448,7 @@ export async function commands() {
                                                 })
 
                                                 await db.update('followers', { id: twitter_user.id }, { $set: { endorse: endorse } })
-                                                if(testmode === false){
+                                                if (testmode === false) {
                                                     await message(
                                                         twitter_user.id_str,
                                                         "Compliments, you're now endorsing " + endorsement + ". Each user that tweets your endorsement will receive  " + parseFloat(tip) + " $" + ticker + " from you! Please be sure your address is always filled with some $" + ticker + "!"
@@ -510,7 +510,7 @@ export async function commands() {
                                                             if (sent !== 'NO_BALANCE') {
                                                                 if (sent !== false && sent !== null && sent.length === 64) {
                                                                     await db.insert('actions', { id: data.statuses[index]['id_str'] })
-                                                                    await post('@' + twitter_user.screen_name + ' just withdrew ' + amount + ' $' + ticker + '! Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
+                                                                    await post('@' + twitter_user.screen_name + ' just withdrew ' + amount + ' $' + ticker + '! Check the transaction here: https://chains.planum.dev/#/transaction/' + coin + '/' + sent)
                                                                 } else {
                                                                     console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
                                                                 }
@@ -766,7 +766,7 @@ export async function endorse(tag, twitter_user, coin, amount) {
                                                         if (sent !== 'NO_BALANCE') {
                                                             if (sent !== false && sent !== null && sent.length === 64) {
                                                                 await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
-                                                                await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $' + sidechain_ticker + ' to @' + totip_user.screen_name + ' because endorsed ' + tag + ' Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
+                                                                await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $' + sidechain_ticker + ' to @' + totip_user.screen_name + ' because endorsed ' + tag + ' Check the transaction here: https://chains.planum.dev/#/transaction/' + coin + '/' + sent)
                                                                 await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
                                                                 await db.insert('actions', { id: data.statuses[index]['id_str'] })
                                                                 newmentions++
