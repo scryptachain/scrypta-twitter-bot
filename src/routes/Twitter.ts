@@ -481,7 +481,7 @@ export async function commands() {
                                             let ticker = <any>'LYRA'
                                             if (exploded[3] !== undefined) {
                                                 coin = <any>await wallet.returnCoinAddress(exploded[3])
-                                                ticker = <any>await wallet.checkAvailableCoin(exploded[3])
+                                                ticker = <any>await wallet.checkAvailableCoin(coin)
                                             }
                                             if (coin !== false) {
                                                 if (amount > 0) {
@@ -761,12 +761,12 @@ export async function endorse(tag, twitter_user, coin, amount) {
                                                     }
                                                 } else {
                                                     try {
-                                                        console.log('SENDING TOKENS FROM ' + twitter_user.address + ' TO ' + totip_user.address)
+                                                        let sidechain_ticker = await wallet.checkAvailableCoin(coin)
                                                         let sent = <any>await wallet.sendPlanum(twitter_user.prv, twitter_user.address, totip_user.address, amount, coin)
                                                         if (sent !== 'NO_BALANCE') {
                                                             if (sent !== false && sent !== null && sent.length === 64) {
                                                                 await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
-                                                                await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $' + coin + ' to @' + totip_user.screen_name + ' because endorsed ' + tag + ' Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
+                                                                await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $' + sidechain_ticker + ' to @' + totip_user.screen_name + ' because endorsed ' + tag + ' Check the transaction here: https://bb.scryptachain.org/tx/' + sent)
                                                                 await db.insert('mentions', { mention_id: mention_id, user_id: user_id, timestamp: new Date().getTime() })
                                                                 await db.insert('actions', { id: data.statuses[index]['id_str'] })
                                                                 newmentions++
