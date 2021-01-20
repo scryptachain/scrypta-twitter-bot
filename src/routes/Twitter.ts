@@ -480,8 +480,8 @@ export async function commands() {
                                             let coin = <any>'LYRA'
                                             let ticker = <any>'LYRA'
                                             if (exploded[3] !== undefined) {
-                                                coin = <any>await wallet.returnCoinAddress(coin)
-                                                ticker = <any>await wallet.checkAvailableCoin(coin)
+                                                coin = <any>await wallet.returnCoinAddress(exploded[3])
+                                                ticker = <any>await wallet.checkAvailableCoin(exploded[3])
                                             }
                                             if (coin !== false) {
                                                 if (amount > 0) {
