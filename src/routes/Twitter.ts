@@ -403,6 +403,7 @@ export async function commands() {
                         for (let j in exploded) {
                             if (exploded[j] === 'endorse') {
                                 let check_action = await db.find('actions', { id: data.statuses[index]['id_str'] })
+                                check_action = null
                                 if (check_action === null) {
                                     const wallet = new Crypto.Scrypta
                                     await db.insert('actions', { id: data.statuses[index]['id_str'] })
@@ -414,8 +415,8 @@ export async function commands() {
                                     let tip = exploded[nit]
                                     let coin = exploded[nic].replace('$', '')
                                     let ticker = await wallet.checkAvailableCoin(coin)
-
                                     if (ticker !== false) {
+                                        console.log('----> ' + ticker + ' IS AVAILABLE')
                                         if (endorsement !== undefined && endorsement !== null && tip !== undefined && coin !== null && coin !== undefined && tip !== null && parseFloat(tip) > 0) {
                                             var check = await db.find('followers', { id: twitter_user.id })
                                             if (check == null) {
@@ -433,7 +434,7 @@ export async function commands() {
                                             if (check.endorse !== undefined) {
                                                 endorse = check.endorse
                                             }
-
+                                            
                                             for (let k in endorse) {
                                                 if (endorse[k].searcher === endorsement) {
                                                     found = true
@@ -448,11 +449,15 @@ export async function commands() {
                                                 })
 
                                                 await db.update('followers', { id: twitter_user.id }, { $set: { endorse: endorse } })
-                                                await message(
-                                                    twitter_user.id_str,
-                                                    "Compliments, you're now endorsing " + endorsement + ". Each user that tweets your endorsement will receive  " + parseFloat(tip) + " $" + ticker + " from you! Please be sure your address is always filled with some $" + ticker + "!"
-                                                )
+                                                if(testmode === false){
+                                                    await message(
+                                                        twitter_user.id_str,
+                                                        "Compliments, you're now endorsing " + endorsement + ". Each user that tweets your endorsement will receive  " + parseFloat(tip) + " $" + ticker + " from you! Please be sure your address is always filled with some $" + ticker + "!"
+                                                    )
+                                                }
                                             }
+                                        } else {
+                                            console.log('-----> MALFORMED REQUEST', endorsement, tip, coin)
                                         }
                                     } else {
                                         console.log(coin + ' IS NOT AVAILABLE.')
