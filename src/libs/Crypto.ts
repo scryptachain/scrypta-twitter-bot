@@ -68,7 +68,7 @@ module Crypto {
                     response('LYRA')
                 } else {
                     const scrypta = new ScryptaCore
-                    const sidechains = await scrypta('/sidechain/list')
+                    const sidechains = await scrypta.get('/sidechain/list')
                     let found = false
                     for (let k in sidechains.data) {
                         let sidechain = sidechains.data[k]
