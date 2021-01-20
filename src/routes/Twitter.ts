@@ -25,7 +25,7 @@ const coinInfo = {
 var _requestSecret
 if (process.env.TWITTER_CONSUMERKEY !== undefined && process.env.TWITTER_CONSUMERSECRET !== undefined) {
     var twtlogin = new twitterlogin({
-        consumerKey: process.env.TWITTER_CONSUMERRKEY,
+        consumerKey: process.env.TWITTER_CONSUMERKEY,
         consumerSecret: process.env.TWITTER_CONSUMERSECRET,
         callback: process.env.URL + '/twitter/callback'
     });
