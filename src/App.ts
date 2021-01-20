@@ -20,6 +20,7 @@ class App {
 
     app.express.get('/', Interface.rendervue)
     app.express.get('/tips', Interface.returnLastTips)
+    app.express.get('/endorsements', Interface.returnEndorsements)
     app.express.get('/twitter/auth', Twitter.getAuthPublisher)
     app.express.get('/twitter/login', Twitter.getAuth)
     app.express.get('/twitter/callback', Twitter.getAccessToken)

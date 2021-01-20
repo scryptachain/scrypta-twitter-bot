@@ -141,6 +141,7 @@ export default {
   },
   async mounted() {
     const app = this;
+    window.scrollTo(0, 0);
     if (localStorage.getItem("user") !== null) {
       app.isLogged = true;
       app.user = JSON.parse(localStorage.getItem("user"));

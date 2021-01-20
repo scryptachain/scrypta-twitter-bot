@@ -13,30 +13,6 @@
             <!-- Nav holder -->
             <div class="ml-auto"></div>
 
-            <!-- Navbar Items -->
-            <ul class="navbar-nav items">
-              <li class="nav-item">
-                <router-link to="/endorsements" class="nav-link smooth-anchor">Endorsers</router-link>
-              </li>
-              <li class="nav-item">
-                <router-link to="/tips" class="nav-link smooth-anchor">All Tips</router-link>
-              </li>
-              <li class="nav-item">
-                <a href="#about" class="nav-link smooth-anchor">About</a>
-              </li>
-              <li class="nav-item">
-                <a href="#how" class="nav-link smooth-anchor">How it Works</a>
-              </li>
-              <li class="nav-item">
-                <a href="#tools" class="nav-link smooth-anchor"
-                  >Other functions</a
-                >
-              </li>
-              <li class="nav-item">
-                <a href="#specs" class="nav-link smooth-anchor">Requirements</a>
-              </li>
-            </ul>
-
             <!-- Navbar Icons -->
             <ul class="navbar-nav icons">
               <li class="nav-item social">
@@ -149,7 +125,8 @@
                     </p>
                     <h5 style="color: #1e50bc">
                       You can also make posts containing:<br />
-                      $LYRA #scrypta #scryptachain and @scryptachain
+                      $LYRA #scrypta #scryptachain and @scryptachain<br>
+                      <a href="/#/endorsements"><h2>DISCOVER ENDORSERS</h2></a>
                     </h5>
                   </div>
                 </div>
@@ -602,15 +579,8 @@ export default {
     },
   },
   async mounted() {
-    const app = this;
-    if (localStorage.getItem("user") !== null) {
-      app.isLogged = true;
-      app.user = JSON.parse(localStorage.getItem("user"));
-      let b = await app.scrypta.get("/balance/" + app.user.address);
-      app.balance = b.balance;
-    }
-  },
-  components: {},
+    window.scrollTo(0, 0);
+  }
 };
 </script>
 

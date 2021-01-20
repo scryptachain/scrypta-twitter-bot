@@ -112,7 +112,7 @@ export function getAccessToken(req: express.Request, res: express.res) {
                             address: userDB.address,
                             image: userDB.profile_image_url_https
                         }
-                        res.send('<html><script>localStorage.setItem(`user`,`' + JSON.stringify(storage) + '`);window.location=`/#/`;</script></html>')
+                        res.send('<html><script>localStorage.setItem(`user`,`' + JSON.stringify(storage) + '`);window.location=`/#/account`;</script></html>')
                     }
                 }
             });

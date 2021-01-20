@@ -1,22 +1,19 @@
 <template>
   <div class="datatable">
+    <span style="color:#fff">Each user will give you the <b>reward</b> if you interact with the <b>endorsed</b> user or tag.</span><br><br>
     <table class="table-dark">
       <thead>
         <tr>
-          <th scope="col"><img src="assets/images/icon_twtt.svg" style="height: 35px" alt="Scrypta" /></th>
-          <th scope="col">Username</th>
-          <th scope="col">@user</th>
-          <th scope="col">#hastag</th>
-          <th scope="col">Rewards</th>
+          <th class="text-left" scope="col">User</th>
+          <th class="text-left" scope="col">Endorsed</th>
+          <th class="text-left" scope="col">Rewards</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <th scope="row">1</th>
-          <td>Mark</td>
-          <td>Otto</td>
-          <td>@mdo</td>
-          <td>wwerwerer</td>
+        <tr v-for="endorser in endorsers" v-bind:key="endorser.user+endorser.searcher">
+          <td class="text-left">{{ endorser.user }}</td>
+          <td class="text-left">{{ endorser.searcher }}</td>
+          <td class="text-left">{{ endorser.tip }} {{ endorser.coin }}</td>
         </tr>
       </tbody>
     </table>
@@ -24,8 +21,21 @@
 </template>
 
 <script>
-
+const axios = require("axios");
 export default {
-  
-}
+  name: "Endorsers",
+  data() {
+    return {
+      endorsers: {}
+    };
+  },
+  async mounted() {
+    window.scrollTo(0, 0);
+    const app = this
+    let endorsers = await axios.get('/endorsements')
+    app.endorsers = endorsers.data
+  }
+};
 </script>
+
+

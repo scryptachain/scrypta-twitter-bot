@@ -12,15 +12,6 @@
             </a>
             <!-- Nav holder -->
             <div class="ml-auto"></div>
-            <!-- Navbar Items -->
-            <ul class="navbar-nav items">
-              <li class="nav-item">
-                  <router-link to="/" class="nav-link smooth-anchor">Home</router-link>
-              </li>
-              <li class="nav-item">
-                <router-link to="/tips" class="nav-link smooth-anchor">All tips</router-link>
-              </li>
-            </ul>
             <!-- Navbar Icons -->
             <ul class="navbar-nav icons">
               <li class="nav-item social">
@@ -83,7 +74,7 @@
           <div class="swiper-wrapper">
             <img
               src="assets/images/icon_twtt.svg"
-              style="height: 400px"
+              style="height: 300px; margin-top:30px;"
               class="hero-image upper"
               alt="Twitter Bot"
             />
@@ -93,7 +84,7 @@
                 <div class="col-12 d-flex inner">
                   <div class="left align-self-center text-center text-md-left">
                     <h1 class="title effect-static-text">
-                      Explore<br />all Endorsers.
+                      Explore<br />all endorsers.
                     </h1>
                   </div>
                 </div>
@@ -103,7 +94,7 @@
         </div>
       </section>
       <!-- Features -->
-      <section id="features" class="section-2 offers featured">
+      <section id="features" class="section-2 offers featured" style="margin-top:-140px;">
         <div class="container">
           <div class="justify-content-center text-center items">
             <Endorser />
@@ -292,7 +283,9 @@ export default {
   components: {
     Endorser,
   },
-
+  mounted(){
+    window.scrollTo(0, 0);
+  },
   data() {
     return {};
   },
