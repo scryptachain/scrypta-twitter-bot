@@ -403,7 +403,6 @@ export async function commands() {
                         for (let j in exploded) {
                             if (exploded[j] === 'endorse') {
                                 let check_action = await db.find('actions', { id: data.statuses[index]['id_str'] })
-                                check_action = null
                                 if (check_action === null) {
                                     const wallet = new Crypto.Scrypta
                                     await db.insert('actions', { id: data.statuses[index]['id_str'] })
@@ -434,7 +433,7 @@ export async function commands() {
                                             if (check.endorse !== undefined) {
                                                 endorse = check.endorse
                                             }
-                                            
+
                                             for (let k in endorse) {
                                                 if (endorse[k].searcher === endorsement) {
                                                     found = true
