@@ -335,13 +335,14 @@ export async function commands() {
                                                             }
                                                         } else if (coin.substr(0, 1) === '6') {
                                                             try {
+                                                                let ticker = await wallet.checkAvailableCoin(coin)
                                                                 console.log('SENDING TOKENS FROM ' + sender_user.address + ' TO ' + totip_user.address)
                                                                 let sent = <any>await wallet.sendPlanum(sender_user.prv, sender_user.address, totip_user.address, amount, coin)
                                                                 if (sent !== 'NO_BALANCE') {
                                                                     if (sent !== false && sent !== null && sent.length === 64) {
                                                                         await db.insert('tips', { user_id: twitter_user.id, id: data.statuses[index]['id_str'], timestamp: new Date().getTime(), amount: amount, coin: coin, channel: 'TWITTER', address: totip_user.address, txid: sent, source: twitter_user.screen_name })
                                                                         await db.insert('actions', { id: data.statuses[index]['id_str'] })
-                                                                        await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $' + coin + ' to @' + totip_user.screen_name + '. Check the transaction here: https://chains.planum.dev/#/transaction/' + coin + '/' + sent)
+                                                                        await post('@' + twitter_user.screen_name + ' just sent ' + amount + ' $' + ticker + ' to @' + totip_user.screen_name + '. Check the transaction here: https://chains.planum.dev/#/transaction/' + coin + '/' + sent)
                                                                     } else {
                                                                         console.log("SEND WAS UNSUCCESSFUL, WILL RETRY LATER")
                                                                     }
