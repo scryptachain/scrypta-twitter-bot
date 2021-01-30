@@ -900,12 +900,12 @@ export async function post(message) {
         if (testmode === false) {
             try {
                 Twitter.post('statuses/update', { status: message })
+                await sleep(10000)
                 response(true)
             } catch (e) {
                 console.log('ERROR POSTING STATUS')
                 response(false)
             }
-            await sleep(10000)
         } else {
             response(true)
         }
