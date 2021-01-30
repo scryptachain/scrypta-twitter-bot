@@ -905,6 +905,7 @@ export async function post(message) {
                 console.log('ERROR POSTING STATUS')
                 response(false)
             }
+            await sleep(10000)
         } else {
             response(true)
         }
