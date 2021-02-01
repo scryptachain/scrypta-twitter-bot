@@ -1,3 +1,4 @@
+import { time } from "console"
 import express = require("express")
 var twit = require('twit')
 var CoinKey = require('coinkey')
@@ -605,7 +606,8 @@ export async function commands() {
                                         if (testmode === false) {
                                             let tweet_url = exploded[2]
                                             let timestamped = await timestamp(sender_user, tweet_url)
-                                            if(timestamped !== false){
+                                            if (timestamped !== false && timestamped['written'] !== undefined && timestamped['written']['uuid'] !== undefined) {
+                                                await post('@' + twitter_user.screen_name + ' just timestamped ' + tweet_url + '! Check here the proof -> https://idanodejs01.scryptachain.org/documenta/' + timestamped['uploaded']['file'])
                                                 await db.insert('actions', { id: data.statuses[index]['id_str'] })
                                             }
                                         } else {
@@ -983,10 +985,22 @@ export function timestamp(twitter_user, tweet_url) {
                 let maxh = parseInt(coordinates.height.toFixed(0)) - 50;
 
                 sharp(buf).extract({ left: 130, top: 55, width: 590, height: maxh })
-                    .toFile(filename, (err, info) => {
+                    .toFile(filename, async (err, info) => {
+                        
                         console.log('Tweet picture created successfully at ' + filename);
-
-                        response(true)
+                        const scrypta = new ScryptaCore
+                        scrypta.staticnodes = true
+                        
+                        try {
+                            let file = fs.readFileSync(filename);
+                            let hexed = file.toString('hex');
+                            let signed = await scrypta.signMessage(twitter_user.prv, hexed)
+                            signed.private_key = twitter_user.prv
+                            let published = await scrypta.post('/documenta/add', signed)
+                            response(published)
+                        } catch (e) {
+                            response(false)
+                        }
                     });
             }, 5000);
         } catch (e) {
