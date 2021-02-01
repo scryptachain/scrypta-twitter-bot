@@ -7,6 +7,9 @@ const ScryptaCore = require('@scrypta/core')
 import * as Crypto from '../libs/Crypto'
 import * as Database from '../libs/Database'
 var testmode = process.env.TESTMODE.toLowerCase() == 'true' ? true : false;
+const puppeteer = require("puppeteer");
+const sharp = require('sharp');
+const fs = require('fs');
 
 if (testmode === true) {
     console.log('\x1b[33m%s\x1b[0m', 'RUNNING IN TEST MODE')
@@ -59,7 +62,7 @@ export function getAuth(req: express.Request, res: express.res) {
 
 export function getAuthPublisher(req: express.Request, res: express.res) {
     publisherlogin.getRequestToken(function (err, requestToken, requestSecret) {
-        if (err){
+        if (err) {
             res.status(500).send(err);
         } else {
             _requestSecret = requestSecret;
@@ -125,7 +128,7 @@ export function getPublisherToken(req: express.Request, res: express.res) {
     var requestToken = req.query.oauth_token,
         verifier = req.query.oauth_verifier;
 
-        publisherlogin.getAccessToken(requestToken, _requestSecret, verifier, function (err, accessToken, accessSecret) {
+    publisherlogin.getAccessToken(requestToken, _requestSecret, verifier, function (err, accessToken, accessSecret) {
         if (err) {
             res.status(500).send(err);
         } else {
@@ -153,7 +156,6 @@ export function getPublisherToken(req: express.Request, res: express.res) {
         }
     });
 }
-
 
 export async function followers(twitter_user) {
     return new Promise(async response => {
@@ -591,6 +593,31 @@ export async function commands() {
                                 }
                             }
                         }
+                    } else if (text.indexOf('timestamp') !== -1) {
+                        let exploded = text.split(' ')
+                        console.log('--> CHECKING ' + text)
+                        for (let j in exploded) {
+                            if (exploded[j] === 'timestamp') {
+                                let check_action = await db.find('actions', { id: data.statuses[index]['id_str'] })
+                                if (check_action === null) {
+                                    var sender_user = await db.find('followers', { id: twitter_user.id })
+                                    if (sender_user !== null && sender_user.prv !== undefined) {
+                                        if (testmode === false) {
+                                            let tweet_url = exploded[2]
+                                            let timestamped = await timestamp(sender_user, tweet_url)
+                                            if(timestamped !== false){
+                                                await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                            }
+                                        } else {
+                                            console.log('STORING IN DB, TESTMODE IS ON')
+                                            await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                        }
+                                    } else {
+                                        console.log('USER IS NOT REGISTERED TO SERVICE.')
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 response(true)
@@ -911,3 +938,59 @@ export async function post(message) {
         }
     })
 }
+
+export function timestamp(twitter_user, tweet_url) {
+    return new Promise(async response => {
+        try {
+
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            console.log('Setting up viewport...');
+
+            await page.setViewport({
+                width: 800,
+                height: 1200
+            });
+
+            const split = tweet_url.split('/');
+            const filename = process.cwd() + '/shots/' + split[3] + '/' + split[5] + '.png';
+            let mention_id = split[5];
+
+            await page.goto(tweet_url);
+
+            if (!fs.existsSync(process.cwd() + '/shots/')) {
+                fs.mkdirSync(process.cwd() + '/shots/');
+            }
+
+            if (!fs.existsSync(process.cwd() + '/shots/' + split[3])) {
+                fs.mkdirSync(process.cwd() + '/shots/' + split[3]);
+            }
+
+            console.log('Loading tweet #' + mention_id + ' from @' + split[3] + '...');
+
+            setTimeout(async function () {
+                let element = await page.$('article');
+                let coordinates = await element.boundingBox();
+
+                await page.screenshot({
+                    path: filename,
+                    fullPage: false
+                });
+
+                await browser.close();
+
+                let buf = fs.readFileSync(filename);
+                let maxh = parseInt(coordinates.height.toFixed(0)) - 50;
+
+                sharp(buf).extract({ left: 130, top: 55, width: 590, height: maxh })
+                    .toFile(filename, (err, info) => {
+                        console.log('Tweet picture created successfully at ' + filename);
+
+                        response(true)
+                    });
+            }, 5000);
+        } catch (e) {
+            response(false)
+        }
+    })
+};

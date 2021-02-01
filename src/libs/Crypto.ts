@@ -143,6 +143,32 @@ module Crypto {
             })
         }
 
+        public writeData(privateKey, from, data, protocol) {
+            return new Promise(async response => {
+                const scrypta = new ScryptaCore
+                scrypta.staticnodes = true
+                console.log('CHECKING BALANCE OF ' + from)
+                let balance = await scrypta.get('/balance/' + from)
+                if (balance.balance >= 0.001) {
+                    try {
+                        console.log('WRITING DATA INTO ACCOUNT ' + from)
+                        let temp = await scrypta.importPrivateKey(privateKey, '-', false)
+                        let written = await scrypta.write(temp.walletstore, '-', data, '', '', protocol)
+                        if (written !== false && written !== null) {
+                            response(written)
+                        } else {
+                            response(false)
+                        }
+                    } catch (e) {
+                        console.log("SENDING ERROR, WILL RETRY LATER")
+                        response(false)
+                    }
+                }else{
+                    response('NO_BALANCE')
+                }
+            })
+        }
+
     }
 
 }

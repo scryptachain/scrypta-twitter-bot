@@ -136,7 +136,7 @@ export default {
     },
     exit() {
       localStorage.setItem("user", null);
-      location.reload();
+      window.location = '/#/';
     },
   },
   async mounted() {
