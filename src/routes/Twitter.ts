@@ -615,7 +615,11 @@ export async function commands() {
                                             let uindex = parseInt(j) + 1
                                             let tweet_url = exploded[uindex]
                                             let timestamped = await timestamp(sender_user, tweet_url)
-                                            console.log('TIMESTAMP RESPONSE IS ' + timestamped)
+                                            try {
+                                                console.log('TIMESTAMP RESPONSE IS ' + JSON.stringify(timestamped))
+                                            } catch (e) {
+                                                console.log('TIMESTAMP RESPONSE IS ' + timestamped)
+                                            }
                                             if (timestamped !== false && timestamped['written'] !== undefined && timestamped['written']['uuid'] !== undefined) {
                                                 await post('@' + twitter_user.screen_name + ' just notarized ' + tweet_url + '! Check here the proof -> https://proof.scryptachain.org/#/uuid/' + timestamped['written']['uuid'])
                                                 await db.insert('actions', { id: data.statuses[index]['id_str'] })
