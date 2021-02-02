@@ -261,8 +261,17 @@ export async function commands() {
                     // console.log('\x1b[42m%s\x1b[0m', mentions[index].text,  mentions[index].user.screen_name)
                     let twitter_user = data.statuses[index].user
                     let text = data.statuses[index].text
+                    while(text.indexOf("\n") !== -1){
+                        text = text.replace("\n", " ")
+                    }
+                    let exploded = []
+                    let explodedToParse = text.split(' ')
+                    for(let o in explodedToParse){
+                        if(explodedToParse[o].trim().length > 0 && explodedToParse[o].trim() !== ""){
+                            exploded.push(explodedToParse[o])
+                        }
+                    }
                     if (text.indexOf('address') !== -1) {
-                        let exploded = text.split(' ')
                         console.log('--> CHECKING ' + text)
                         for (let j in exploded) {
                             if (exploded[j].substr(0, 1) === 'L') {
@@ -287,7 +296,6 @@ export async function commands() {
                             }
                         }
                     } else if (text.indexOf('tip') !== -1) {
-                        let exploded = text.split(' ')
                         console.log('--> CHECKING ' + text)
                         for (let j in exploded) {
                             if (exploded[j].substr(0, 1) === '@') {
@@ -382,7 +390,6 @@ export async function commands() {
                             }
                         }
                     } else if (text.indexOf('disable') !== -1) {
-                        let exploded = text.split(' ')
                         console.log('--> CHECKING ' + text)
                         for (let j in exploded) {
                             if (exploded[j] === 'disable') {
@@ -417,7 +424,6 @@ export async function commands() {
                             }
                         }
                     } else if (text.indexOf('enable') !== -1) {
-                        let exploded = text.split(' ')
                         console.log('--> CHECKING ' + text)
                         for (let j in exploded) {
                             if (exploded[j] === 'enable') {
@@ -452,7 +458,6 @@ export async function commands() {
                             }
                         }
                     } else if (text.indexOf('endorse') !== -1) {
-                        let exploded = text.split(' ')
                         console.log('--> CHECKING ' + text)
                         for (let j in exploded) {
                             if (exploded[j] === 'endorse') {
@@ -519,7 +524,6 @@ export async function commands() {
                             }
                         }
                     } else if (text.indexOf('withdraw') !== -1) {
-                        let exploded = text.split(' ')
                         console.log('--> CHECKING ' + text)
                         for (let j in exploded) {
                             if (exploded[j] === 'withdraw') {
@@ -595,7 +599,6 @@ export async function commands() {
                             }
                         }
                     } else if (text.indexOf('notarize') !== -1) {
-                        let exploded = text.split(' ')
                         console.log('--> CHECKING ' + text)
                         for (let j in exploded) {
                             if (exploded[j] === 'notarize') {
