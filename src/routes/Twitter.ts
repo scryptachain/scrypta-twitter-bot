@@ -612,7 +612,8 @@ export async function commands() {
                                     }
                                     if (sender_user !== null && sender_user.prv !== undefined) {
                                         if (testmode === false) {
-                                            let tweet_url = exploded[2]
+                                            let uindex = j + 1
+                                            let tweet_url = exploded[uindex]
                                             let timestamped = await timestamp(sender_user, tweet_url)
                                             console.log('TIMESTAMP RESPONSE IS ' + timestamped)
                                             if (timestamped !== false && timestamped['written'] !== undefined && timestamped['written']['uuid'] !== undefined) {
