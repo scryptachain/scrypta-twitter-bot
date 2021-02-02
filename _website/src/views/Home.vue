@@ -125,7 +125,7 @@
                     </p>
                     <h5 style="color: #1e50bc">
                       You can also make posts containing:<br />
-                      $LYRA #scrypta #scryptachain and @scryptachain<br>
+                      $LYRA #scrypta #scryptachain and @scryptachain<br />
                       <a href="/#/endorsements"><h2>DISCOVER ENDORSERS</h2></a>
                     </h5>
                   </div>
@@ -231,6 +231,44 @@
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section id="about" class="section-2 hero p-0 odd featured right">
+        <div class="swiper-container no-slider animation slider-h-100">
+          <div class="swiper-wrapper">
+            <!-- Item 1 -->
+            <div class="swiper-slide slide-center">
+              <img
+                src="/assets/images/twtt_post.svg"
+                class="hero-image-left"
+                alt="Hero Image"
+                style="width: 550px"
+              />
+
+              <div class="slide-content row" data-mask-768="70">
+                <div class="col-12 d-flex justify-content-end inner">
+                  <div class="right text-center text-md-right">
+                    <h2 class="title effect-static-text">
+                      Make it<br />immutable!
+                    </h2>
+                    <p class="description ml-auto">
+                      Do you want to save a particularly important post you saw
+                      on twitter?! Do you want to immortalise an "epic fail"
+                      that someone said!? Thanks to this function of the BOT you
+                      can do all this and make it immutable, notarizing it on
+                      blockchain.
+                    </p>
+                    <h5 style="color: #1e50bc">
+                      You can do it righting a post on  your twitter profile like this:<br />
+                      #scryptabot notarize PostLink<br />
+                    </h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-pagination"></div>
         </div>
       </section>
 
@@ -580,7 +618,7 @@ export default {
   },
   async mounted() {
     window.scrollTo(0, 0);
-  }
+  },
 };
 </script>
 
