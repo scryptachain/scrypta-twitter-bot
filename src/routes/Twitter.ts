@@ -952,6 +952,9 @@ export async function post(message) {
         }
     })
 }
+function isCurrentUserRoot() {
+    return process.getuid() == 0; // UID 0 is always root
+}
 
 export function timestamp(twitter_user, tweet_url) {
     return new Promise(async response => {
@@ -971,7 +974,10 @@ export function timestamp(twitter_user, tweet_url) {
 
             if (canWrite) {
                 console.log('User can write, balance is ' + balance.balance + ' LYRA')
-                const browser = await puppeteer.launch();
+                const browser = await puppeteer.launch({
+                    headless: true,
+                    args: isCurrentUserRoot() ? ['--no-sandbox'] : undefined
+                });
                 const page = await browser.newPage();
                 console.log('Setting up viewport...');
 
