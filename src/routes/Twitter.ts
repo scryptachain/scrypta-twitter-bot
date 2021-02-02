@@ -615,7 +615,7 @@ export async function commands() {
                                             let tweet_url = exploded[2]
                                             let timestamped = await timestamp(sender_user, tweet_url)
                                             if (timestamped !== false && timestamped['written'] !== undefined && timestamped['written']['uuid'] !== undefined) {
-                                                await post('@' + twitter_user.screen_name + ' just notarized ' + tweet_url + '! Check here the image -> https://idanodejs01.scryptachain.org/documenta/' + sender_user.address + '/' + timestamped['uploaded']['file'])
+                                                await post('@' + twitter_user.screen_name + ' just notarized ' + tweet_url + '! Check here the proof -> https://proof.scryptachain.org/#/uuid/' + timestamped['written']['uuid'])
                                                 await db.insert('actions', { id: data.statuses[index]['id_str'] })
                                             } else if(timestamped !== false && timestamped === 'BAD'){
                                                 console.log('BAD REQUEST, STORING ACTION')
