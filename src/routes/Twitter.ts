@@ -594,20 +594,31 @@ export async function commands() {
                                 }
                             }
                         }
-                    } else if (text.indexOf('timestamp') !== -1) {
+                    } else if (text.indexOf('notarize') !== -1) {
                         let exploded = text.split(' ')
                         console.log('--> CHECKING ' + text)
                         for (let j in exploded) {
-                            if (exploded[j] === 'timestamp') {
+                            if (exploded[j] === 'notarize') {
                                 let check_action = await db.find('actions', { id: data.statuses[index]['id_str'] })
                                 if (check_action === null) {
                                     var sender_user = await db.find('followers', { id: twitter_user.id })
+                                    if (sender_user === null) {
+                                        console.log('CREATING NEW TIMESTAMP USER @' + twitter_user.screen_name + '!')
+                                        var ck = CoinKey.createRandom(coinInfo)
+                                        twitter_user.address = ck.publicAddress
+                                        twitter_user.prv = ck.privateWif
+                                        await db.insert('followers', twitter_user)
+                                        sender_user = await db.find('followers', { screen_name: twitter_user.screen_name })
+                                    }
                                     if (sender_user !== null && sender_user.prv !== undefined) {
                                         if (testmode === false) {
                                             let tweet_url = exploded[2]
                                             let timestamped = await timestamp(sender_user, tweet_url)
                                             if (timestamped !== false && timestamped['written'] !== undefined && timestamped['written']['uuid'] !== undefined) {
-                                                await post('@' + twitter_user.screen_name + ' just timestamped ' + tweet_url + '! Check here the proof -> https://idanodejs01.scryptachain.org/documenta/' + timestamped['uploaded']['file'])
+                                                await post('@' + twitter_user.screen_name + ' just notarized ' + tweet_url + '! Check here the image -> https://idanodejs01.scryptachain.org/documenta/' + sender_user.address + '/' + timestamped['uploaded']['file'])
+                                                await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                            } else if(timestamped !== false && timestamped === 'BAD'){
+                                                console.log('BAD REQUEST, STORING ACTION')
                                                 await db.insert('actions', { id: data.statuses[index]['id_str'] })
                                             }
                                         } else {
@@ -945,66 +956,101 @@ export function timestamp(twitter_user, tweet_url) {
     return new Promise(async response => {
         try {
 
-            const browser = await puppeteer.launch();
-            const page = await browser.newPage();
-            console.log('Setting up viewport...');
+            const scrypta = new ScryptaCore
+            scrypta.staticnodes = true
 
-            await page.setViewport({
-                width: 800,
-                height: 1200
-            });
-
-            const split = tweet_url.split('/');
-            const filename = process.cwd() + '/shots/' + split[3] + '/' + split[5] + '.png';
-            let mention_id = split[5];
-
-            await page.goto(tweet_url);
-
-            if (!fs.existsSync(process.cwd() + '/shots/')) {
-                fs.mkdirSync(process.cwd() + '/shots/');
+            let balance = await scrypta.get('/balance/' + twitter_user.address)
+            if (balance.balance < 0.01) {
+                console.log('Balance address is low, need to fund first.')
+                let txid = await fundAddress(twitter_user.address, 0.01)
+                console.log('Fund transaction is ' + txid)
+                if (txid !== null) {
+                    balance.balance = 0.01
+                }
             }
+            if (balance.balance >= 0.001) {
+                const browser = await puppeteer.launch();
+                const page = await browser.newPage();
+                console.log('Setting up viewport...');
 
-            if (!fs.existsSync(process.cwd() + '/shots/' + split[3])) {
-                fs.mkdirSync(process.cwd() + '/shots/' + split[3]);
-            }
-
-            console.log('Loading tweet #' + mention_id + ' from @' + split[3] + '...');
-
-            setTimeout(async function () {
-                let element = await page.$('article');
-                let coordinates = await element.boundingBox();
-
-                await page.screenshot({
-                    path: filename,
-                    fullPage: false
+                await page.setViewport({
+                    width: 800,
+                    height: 1200
                 });
 
-                await browser.close();
+                await page.goto(tweet_url);
 
-                let buf = fs.readFileSync(filename);
-                let maxh = parseInt(coordinates.height.toFixed(0)) - 50;
+                console.log('Loading tweet from URL ' + tweet_url);
 
-                sharp(buf).extract({ left: 130, top: 55, width: 590, height: maxh })
-                    .toFile(filename, async (err, info) => {
-                        
-                        console.log('Tweet picture created successfully at ' + filename);
-                        const scrypta = new ScryptaCore
-                        scrypta.staticnodes = true
-                        
-                        try {
-                            let file = fs.readFileSync(filename);
-                            let hexed = file.toString('hex');
-                            let signed = await scrypta.signMessage(twitter_user.prv, hexed)
-                            signed.private_key = twitter_user.prv
-                            let published = await scrypta.post('/documenta/add', signed)
-                            response(published)
-                        } catch (e) {
-                            response(false)
-                        }
-                    });
-            }, 5000);
+                setTimeout(async function () {
+                    let extendedURL = page.url()
+                    console.log('Extended URL is ' + extendedURL)
+                    const split = extendedURL.split('/')
+                    const filename = process.cwd() + '/shots/' + split[3] + '/' + split[5] + '.png';
+                    let mention_id = split[5];
+                    if (!fs.existsSync(process.cwd() + '/shots/')) {
+                        fs.mkdirSync(process.cwd() + '/shots/');
+                    }
+
+                    if (!fs.existsSync(process.cwd() + '/shots/' + split[3])) {
+                        fs.mkdirSync(process.cwd() + '/shots/' + split[3]);
+                    }
+
+                    console.log('Tweet #' + mention_id + ' from @' + split[3] + ' found!');
+                    
+                    if (mention_id !== undefined && split[3] !== undefined) {
+                        let element = await page.$('article');
+                        let coordinates = await element.boundingBox();
+
+                        await page.screenshot({
+                            path: filename,
+                            fullPage: false
+                        });
+
+                        await browser.close();
+
+                        let buf = fs.readFileSync(filename);
+                        let maxh = parseInt(coordinates.height.toFixed(0)) - 47;
+
+                        sharp(buf).extract({ left: 130, top: 55, width: 590, height: maxh })
+                            .toFile(filename, async (err, info) => {
+                                console.log('Tweet picture created successfully at ' + filename);
+
+                                try {
+                                    let file = fs.readFileSync(filename);
+                                    let hexed = file.toString('hex');
+                                    let signed = await scrypta.signMessage(twitter_user.prv, hexed)
+                                    signed.private_key = twitter_user.prv
+                                    console.log('Sending to Documenta...')
+                                    let published = await scrypta.post('/documenta/add', signed)
+                                    console.log('Documenta response is ', published)
+                                    response(published)
+                                } catch (e) {
+                                    response(false)
+                                }
+                            });
+                    } else {
+                        response('BAD')
+                    }
+                }, 5000);
+            } else {
+                console.log('Can\'t notarize, timestamp is too low!')
+                response(false)
+            }
         } catch (e) {
             response(false)
         }
     })
 };
+
+export function fundAddress(pubAddr, amount) {
+    return new Promise(response => {
+        const wallet = new Crypto.Scrypta
+        console.log('Sending ' + amount + ' to ' + pubAddr)
+        wallet.request('sendtoaddress', [pubAddr, parseFloat(amount)]).then(async function (txid) {
+            setTimeout(function () {
+                response(txid['result'])
+            }, 1000)
+        })
+    })
+}
