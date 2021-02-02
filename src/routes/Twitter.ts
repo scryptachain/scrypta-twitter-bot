@@ -956,7 +956,6 @@ export async function post(message) {
 export function timestamp(twitter_user, tweet_url) {
     return new Promise(async response => {
         try {
-
             const scrypta = new ScryptaCore
             scrypta.staticnodes = true
             let canWrite = true
@@ -1040,6 +1039,7 @@ export function timestamp(twitter_user, tweet_url) {
                 response(false)
             }
         } catch (e) {
+            console.log(e)
             response(false)
         }
     })
