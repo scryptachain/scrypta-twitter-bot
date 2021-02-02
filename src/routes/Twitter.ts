@@ -970,6 +970,7 @@ export function timestamp(twitter_user, tweet_url) {
             }
 
             if (canWrite) {
+                console.log('User can write, balance is ' + balance.balance + ' LYRA')
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
                 console.log('Setting up viewport...');
@@ -1027,6 +1028,7 @@ export function timestamp(twitter_user, tweet_url) {
                                     console.log('Documenta response is ', published)
                                     response(published)
                                 } catch (e) {
+                                    console.log(e)
                                     response(false)
                                 }
                             });
@@ -1036,11 +1038,11 @@ export function timestamp(twitter_user, tweet_url) {
                 }, 5000);
             } else {
                 console.log('Can\'t notarize, balance is too low!')
-                response(false)
+                response('NO_BALANCE')
             }
         } catch (e) {
             console.log(e)
-            response(false)
+            response('ERROR')
         }
     })
 };
