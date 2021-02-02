@@ -968,10 +968,8 @@ export function timestamp(twitter_user, tweet_url) {
                 if (txid === null) {
                     canWrite = false
                 }
-            } else {
-                canWrite = false
             }
-            
+
             if (canWrite) {
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
@@ -1038,7 +1036,7 @@ export function timestamp(twitter_user, tweet_url) {
                     }
                 }, 5000);
             } else {
-                console.log('Can\'t notarize, timestamp is too low!')
+                console.log('Can\'t notarize, balance is too low!')
                 response(false)
             }
         } catch (e) {
