@@ -614,10 +614,11 @@ export async function commands() {
                                         if (testmode === false) {
                                             let tweet_url = exploded[2]
                                             let timestamped = await timestamp(sender_user, tweet_url)
+                                            console.log('TIMESTAMP RESPONSE IS ' + timestamped)
                                             if (timestamped !== false && timestamped['written'] !== undefined && timestamped['written']['uuid'] !== undefined) {
                                                 await post('@' + twitter_user.screen_name + ' just notarized ' + tweet_url + '! Check here the proof -> https://proof.scryptachain.org/#/uuid/' + timestamped['written']['uuid'])
                                                 await db.insert('actions', { id: data.statuses[index]['id_str'] })
-                                            } else if(timestamped !== false && timestamped === 'BAD'){
+                                            } else if (timestamped !== false && timestamped === 'BAD') {
                                                 console.log('BAD REQUEST, STORING ACTION')
                                                 await db.insert('actions', { id: data.statuses[index]['id_str'] })
                                             }
@@ -958,17 +959,20 @@ export function timestamp(twitter_user, tweet_url) {
 
             const scrypta = new ScryptaCore
             scrypta.staticnodes = true
-
+            let canWrite = true
             let balance = await scrypta.get('/balance/' + twitter_user.address)
             if (balance.balance < 0.01) {
                 console.log('Balance address is low, need to fund first.')
                 let txid = await fundAddress(twitter_user.address, 0.01)
                 console.log('Fund transaction is ' + txid)
-                if (txid !== null) {
-                    balance.balance = 0.01
+                if (txid === null) {
+                    canWrite = false
                 }
+            } else {
+                canWrite = false
             }
-            if (balance.balance >= 0.001) {
+            
+            if (canWrite) {
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
                 console.log('Setting up viewport...');
@@ -997,7 +1001,7 @@ export function timestamp(twitter_user, tweet_url) {
                     }
 
                     console.log('Tweet #' + mention_id + ' from @' + split[3] + ' found!');
-                    
+
                     if (mention_id !== undefined && split[3] !== undefined) {
                         let element = await page.$('article');
                         let coordinates = await element.boundingBox();
