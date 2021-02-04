@@ -617,17 +617,22 @@ export async function commands() {
                                         if (testmode === false) {
                                             let uindex = parseInt(j) + 1
                                             let tweet_url = exploded[uindex]
-                                            let timestamped = await timestamp(sender_user, tweet_url)
-                                            try {
-                                                console.log('TIMESTAMP RESPONSE IS ' + JSON.stringify(timestamped))
-                                            } catch (e) {
-                                                console.log('TIMESTAMP RESPONSE IS ' + timestamped)
-                                            }
-                                            if (timestamped !== false && timestamped['written'] !== undefined && timestamped['written']['uuid'] !== undefined) {
-                                                await post('@' + twitter_user.screen_name + ' just notarized ' + tweet_url + '! Check here the proof -> https://proof.scryptachain.org/#/uuid/' + timestamped['written']['uuid'])
-                                                await db.insert('actions', { id: data.statuses[index]['id_str'] })
-                                            } else if (timestamped !== false && timestamped === 'BAD') {
-                                                console.log('BAD REQUEST, STORING ACTION')
+                                            if(tweet_url.indexOf('http') !== -1){
+                                                let timestamped = await timestamp(sender_user, tweet_url)
+                                                try {
+                                                    console.log('TIMESTAMP RESPONSE IS ' + JSON.stringify(timestamped))
+                                                } catch (e) {
+                                                    console.log('TIMESTAMP RESPONSE IS ' + timestamped)
+                                                }
+                                                if (timestamped !== false && timestamped['written'] !== undefined && timestamped['written']['uuid'] !== undefined) {
+                                                    await post('@' + twitter_user.screen_name + ' just notarized ' + tweet_url + '! Check here the proof -> https://proof.scryptachain.org/#/uuid/' + timestamped['written']['uuid'])
+                                                    await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                } else if (timestamped !== false && timestamped === 'BAD') {
+                                                    console.log('BAD REQUEST, STORING ACTION')
+                                                    await db.insert('actions', { id: data.statuses[index]['id_str'] })
+                                                }
+                                            }else{
+                                                console.log('BAD REQUEST, STORING ACTION.')
                                                 await db.insert('actions', { id: data.statuses[index]['id_str'] })
                                             }
                                         } else {
