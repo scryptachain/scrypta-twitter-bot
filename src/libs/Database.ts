@@ -1,4 +1,5 @@
 const { MongoClient } = require("mongodb");
+require('dotenv').config()
 
 module Database {
 
@@ -8,7 +9,7 @@ module Database {
         public find(collection, query = {}, sort?): any {
             return new Promise(async response => {
                 try {
-                    let client = new MongoClient("mongodb://localhost:27017", { useUnifiedTopology: true });
+                    let client = new MongoClient(process.env.MONGODB_CONNECTION, { useUnifiedTopology: true });
                     await client.connect();
                     const db = await client.db("bot");
                     let result
