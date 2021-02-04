@@ -30,7 +30,7 @@ module Database {
         public insert(collection, document): any {
             return new Promise(async response => {
                 try {
-                    let client = new MongoClient("mongodb://localhost:27017", { useUnifiedTopology: true });
+                    let client = new MongoClient(process.env.MONGODB_CONNECTION, { useUnifiedTopology: true });
                     await client.connect();
                     const db = await client.db("bot");
                     let result = await db.collection(collection).insertOne(document)
@@ -47,7 +47,7 @@ module Database {
         public update(collection, query, document): any {
             return new Promise(async response => {
                 try {
-                    let client = new MongoClient("mongodb://localhost:27017", { useUnifiedTopology: true });
+                    let client = new MongoClient(process.env.MONGODB_CONNECTION, { useUnifiedTopology: true });
                     await client.connect();
                     const db = await client.db("bot");
                     await db.collection(collection).updateOne(query, document)
