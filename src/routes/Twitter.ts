@@ -617,8 +617,8 @@ export async function commands() {
                                         if (testmode === false) {
                                             let uindex = parseInt(j) + 1
                                             let tweet_url = exploded[uindex]
-                                            if(tweet_url.indexOf('http') !== -1 && ( tweet_url.indexOf('t.co') !== -1 || tweet_url.indexOf('twitter.com') !== -1)){
-                                                let timestamped = await timestamp(sender_user, tweet_url)
+                                            if(tweet_url.indexOf('http') !== -1 && (tweet_url.indexOf('t.co') !== -1 || tweet_url.indexOf('twitter.com') !== -1)){
+                                                let timestamped = await timestamp(sender_user, tweet_url, data.statuses[index]['id_str'])
                                                 try {
                                                     console.log('TIMESTAMP RESPONSE IS ' + JSON.stringify(timestamped))
                                                 } catch (e) {
@@ -933,11 +933,10 @@ export async function message(twitter_user, message) {
             var msg = { "event": { "type": "message_create", "message_create": { "target": { "recipient_id": twitter_user }, "message_data": { "text": message } } } }
             Twitter.post('direct_messages/events/new', msg, async function (err, data) {
                 if (data.event !== undefined) {
-                    await sleep(10000)
+                    await sleep(30000)
                     response(true)
                 } else {
                     console.log("Can't send message to user, sorry.")
-                    await sleep(10000)
                     response(false)
                 }
             })
@@ -954,7 +953,7 @@ export async function post(message) {
         if (testmode === false) {
             try {
                 Twitter.post('statuses/update', { status: message })
-                await sleep(10000)
+                await sleep(30000)
                 response(true)
             } catch (e) {
                 console.log('ERROR POSTING STATUS')
@@ -969,7 +968,7 @@ function isCurrentUserRoot() {
     return process.getuid() == 0; // UID 0 is always root
 }
 
-export function timestamp(twitter_user, tweet_url) {
+export function timestamp(twitter_user, tweet_url, id_str) {
     return new Promise(async response => {
         try {
             const scrypta = new ScryptaCore
@@ -1019,7 +1018,7 @@ export function timestamp(twitter_user, tweet_url) {
 
                     console.log('Tweet #' + mention_id + ' from @' + split[3] + ' found!');
 
-                    if (mention_id !== undefined && split[3] !== undefined) {
+                    if (mention_id !== undefined && split[3] !== undefined && mention_id !== id_str) {
                         let element = await page.$('article');
                         let coordinates = await element.boundingBox();
 
