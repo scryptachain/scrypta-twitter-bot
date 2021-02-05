@@ -617,7 +617,7 @@ export async function commands() {
                                         if (testmode === false) {
                                             let uindex = parseInt(j) + 1
                                             let tweet_url = exploded[uindex]
-                                            if(tweet_url.indexOf('http') !== -1){
+                                            if(tweet_url.indexOf('http') !== -1 && ( tweet_url.indexOf('t.co') !== -1 || tweet_url.indexOf('twitter.com') !== -1)){
                                                 let timestamped = await timestamp(sender_user, tweet_url)
                                                 try {
                                                     console.log('TIMESTAMP RESPONSE IS ' + JSON.stringify(timestamped))
