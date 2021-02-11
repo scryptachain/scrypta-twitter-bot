@@ -72,9 +72,7 @@
                     <h6>Private Key</h6>
                     <div class="d-inline-flex justify-content-center">
                       <p v-if="user.prv">
-                        {{ user.prv.substr(0, 10) }}...{{
-                          user.prv.substr(-10)
-                        }}
+                        {{ user.prv }}
                       </p>
                     </div>
                   </div>
