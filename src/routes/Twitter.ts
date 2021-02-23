@@ -1084,10 +1084,10 @@ export async function publish() {
         var not_published = await db.find('tips', { posted: false, source: 'BOT' }, { timestamp: -1 })
 
         if(not_published.length > 0){
-            let tweet = "Just tipped following users for their support!"
+            let tweet = "Just tipped following users, check at faucet.scryptachain.org!"
             for(let k in not_published){
                 let tip = not_published[k]
-                if(tweet.length <= 120){
+                if(tweet.length <= 140){
                     let user = await db.find('followers', {id: tip.user_id})
                     if(user.screen_name !== undefined){
                         tweet += " @" + user.screen_name 
