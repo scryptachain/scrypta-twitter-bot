@@ -55,6 +55,7 @@ class App {
         await Twitter.tag('$' + process.env.COIN, process.env.TWITTER_USERNAME)
         await Twitter.tag('#scrypta', process.env.TWITTER_USERNAME)
         await Twitter.tag('#scryptachain', process.env.TWITTER_USERNAME)
+        await Twitter.publish()
 
         const db = new Database.Mongo
         let endorsers = await db.find('followers', { endorse: { $exists: true } }, { address: 1 })
