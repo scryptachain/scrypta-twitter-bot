@@ -308,12 +308,16 @@ export async function commands() {
                                         let totip_user = await db.find('followers', { screen_name: totip_screenname })
                                         if (totip_user === null) {
                                             console.log('CREATING NEW TIPPED USER @' + totip_screenname + '!')
-                                            let twitter_user = await Twitter.get('users/show', { screen_name: totip_screenname })
-                                            var ck = CoinKey.createRandom(coinInfo)
-                                            twitter_user.data.address = ck.publicAddress
-                                            twitter_user.data.prv = ck.privateWif
-                                            await db.insert('followers', twitter_user.data)
-                                            totip_user = await db.find('followers', { screen_name: totip_screenname })
+                                            try{
+                                                let twitter_user = await Twitter.get('users/show', { screen_name: totip_screenname })
+                                                var ck = CoinKey.createRandom(coinInfo)
+                                                twitter_user.data.address = ck.publicAddress
+                                                twitter_user.data.prv = ck.privateWif
+                                                await db.insert('followers', twitter_user.data)
+                                                totip_user = await db.find('followers', { screen_name: totip_screenname })
+                                            }catch(e){
+                                                console.log("Can't create user, ignoring.")
+                                            }
                                         }
                                         if (totip_user !== null) {
                                             let amount = parseFloat(exploded[3])
